@@ -1,0 +1,2 @@
+- [GraphRAG stack constraints](graphrag-stack.md) — TF-IDF embedder, SimpleVectorStore, NetworkX, Gemini rate-limited; all LLM calls need fallbacks
+- [Analytics data shape](analytics-data-shape.md) — 221 chunks, 18 G20 countries, 7 indicators; `_graph` attr on nx_graph; edge data uses `type` key not `relation`
