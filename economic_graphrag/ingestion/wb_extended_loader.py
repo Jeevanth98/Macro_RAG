@@ -137,9 +137,9 @@ def load_wb_extended_data() -> List[Dict[str, Any]]:
     all_docs: List[Dict[str, Any]] = []
 
     for code, name in EXTENDED_INDICATORS.items():
-        print(f"  Fetching WB Extended: {name} …")
+        print(f"  Fetching WB Extended: {name} ...")
         docs = _fetch_wb_extended(code, name)
         all_docs.extend(docs)
-        print(f"    → {len(docs)} country documents")
+        print(f"    -> {len(docs)} country documents")
 
     return all_docs

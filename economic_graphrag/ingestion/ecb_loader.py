@@ -121,10 +121,10 @@ def load_ecb_data() -> List[Dict[str, Any]]:
 
     for series_key, name, country, unit in ECB_SERIES:
         url = f"{_BASE}/{series_key}"
-        print(f"  Fetching ECB: {name} …")
+        print(f"  Fetching ECB: {name} ...")
         df  = _ecb_to_annual_df(url)
         if df is None or df.empty:
-            print(f"    → no data returned")
+            print(f"    -> no data returned")
             continue
 
         latest_row = df.tail(1)
@@ -158,6 +158,6 @@ def load_ecb_data() -> List[Dict[str, Any]]:
             "country":         country,
             "indicator":       name,
         })
-        print(f"    → {len(df)} annual data points")
+        print(f"    -> {len(df)} annual data points")
 
     return docs

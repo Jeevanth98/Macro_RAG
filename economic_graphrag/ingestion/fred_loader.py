@@ -54,7 +54,7 @@ def load_fred_data() -> List[Dict[str, Any]]:
 
     all_docs: List[Dict[str, Any]] = []
     for series_id, series_name in FRED_SERIES.items():
-        print(f"  Fetching {series_name} (FRED: {series_id}) …")
+        print(f"  Fetching {series_name} (FRED: {series_id}) ...")
         df = _fetch_series(series_id, settings.FRED_API_KEY)
         if df.empty:
             continue
@@ -80,6 +80,6 @@ def load_fred_data() -> List[Dict[str, Any]]:
             "country": "United States",
             "indicator": series_name,
         })
-        print(f"    → {len(df)} observations loaded")
+        print(f"    -> {len(df)} observations loaded")
 
     return all_docs

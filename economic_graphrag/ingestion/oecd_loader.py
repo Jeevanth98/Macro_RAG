@@ -79,7 +79,7 @@ def _fetch_oecd_gdp(country_code: str) -> pd.DataFrame:
 def load_oecd_data() -> List[Dict[str, Any]]:
     all_documents = []
     for code, name in G7_COUNTRIES.items():
-        print(f"  Fetching GDP growth for {name} …")
+        print(f"  Fetching GDP growth for {name} ...")
         df = _fetch_oecd_gdp(code)
         if not df.empty:
             # Recent years summary for richer content

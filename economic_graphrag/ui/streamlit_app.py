@@ -44,6 +44,7 @@ try:
         forecast_series,
         INDICATOR_SHORT,
         INDICATOR_UNITS,
+        simulate_policy_shock,
     )
     from economic_graphrag.analytics.recession_risk import (
         compute_all_risks, compute_country_risk,
@@ -316,6 +317,7 @@ PAGE_TABS = st.tabs([
     "ℹ️ About",
     "🚦 Recession Risk",
     "📝 Economic Report",
+    "🎛️ Policy Sandbox",
 ])
 
 
@@ -1508,8 +1510,6 @@ with PAGE_TABS[9]:
                     mime="text/markdown",
                     use_container_width=True,
                 )
-                # Plain text version
-                plain = report_md.replace("#", "").replace("**", "").replace("*", "").replace("|", "\t")
                 dcol2.download_button(
                     "⬇️ Download Report (.txt)",
                     plain,
@@ -1517,3 +1517,372 @@ with PAGE_TABS[9]:
                     mime="text/plain",
                     use_container_width=True,
                 )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 10 — POLICY SIMULATION SANDBOX
+# ══════════════════════════════════════════════════════════════════════════════
+with PAGE_TABS[10]:
+    st.header("🎛️ Macroeconomic Policy Simulation Sandbox")
+    st.caption("Apply hypothetical policy shocks and observe the forecast deviations and risk changes.")
+
+    if not is_ready or not _VIZ_OK:
+        st.info("👈 Ingest data first to run simulation sandbox.")
+    else:
+        tidy_df = _get_tidy_df()
+        if tidy_df.empty:
+            st.warning("No structured data available.")
+        else:
+            all_countries = sorted(tidy_df["country"].unique())
+
+            # Setup session state default values for the sliders
+            if "sandbox_ir" not in st.session_state:
+                st.session_state.sandbox_ir = 0.0
+            if "sandbox_gdp" not in st.session_state:
+                st.session_state.sandbox_gdp = 0.0
+            if "sandbox_debt" not in st.session_state:
+                st.session_state.sandbox_debt = 0.0
+            if "sandbox_lag" not in st.session_state:
+                st.session_state.sandbox_lag = 1
+
+            # Callback functions for Quick Scenarios to update state BEFORE widgets are drawn
+            def trigger_crunch():
+                st.session_state.sandbox_ir = -300.0
+                st.session_state.sandbox_gdp = -4.0
+                st.session_state.sandbox_debt = 15.0
+                st.session_state.sandbox_lag = 1
+
+            def trigger_oil():
+                st.session_state.sandbox_ir = 250.0
+                st.session_state.sandbox_gdp = -3.0
+                st.session_state.sandbox_debt = 5.0
+                st.session_state.sandbox_lag = 1
+
+            def trigger_stimulus():
+                st.session_state.sandbox_ir = -400.0
+                st.session_state.sandbox_gdp = 3.0
+                st.session_state.sandbox_debt = 12.0
+                st.session_state.sandbox_lag = 0
+
+            def trigger_crisis():
+                st.session_state.sandbox_ir = 350.0
+                st.session_state.sandbox_gdp = -2.5
+                st.session_state.sandbox_debt = 20.0
+                st.session_state.sandbox_lag = 1
+
+            def trigger_reset():
+                st.session_state.sandbox_ir = 0.0
+                st.session_state.sandbox_gdp = 0.0
+                st.session_state.sandbox_debt = 0.0
+                st.session_state.sandbox_lag = 1
+
+            # 1. Controls
+            col_ctrl1, col_ctrl2 = st.columns([1, 1])
+
+            with col_ctrl1:
+                st.subheader("⚙️ Simulation Settings")
+
+                sel_country = st.selectbox("Target Country", all_countries, key="sandbox_country_sel")
+
+                # Sliders using st.slider but pointing to session state values
+                ir_shock = st.slider(
+                    "Interest Rates Shock (bps)", 
+                    -500.0, 500.0, 
+                    step=50.0, 
+                    key="sandbox_ir",
+                    help="Adjustment to central bank policy rate in basis points (100 bps = 1.0%)."
+                )
+                gdp_shock = st.slider(
+                    "GDP growth Shock (%)", 
+                    -5.0, 5.0, 
+                    step=0.5, 
+                    key="sandbox_gdp",
+                    help="Direct annual percentage growth rate adjustment."
+                )
+                debt_shock = st.slider(
+                    "Government Debt Shock (% of GDP)", 
+                    -20.0, 20.0, 
+                    step=1.0, 
+                    key="sandbox_debt",
+                    help="Direct percentage points of GDP adjustment to national debt."
+                )
+                lag_years = st.slider(
+                    "Correlation Lag (Years)",
+                    0, 3,
+                    step=1,
+                    key="sandbox_lag",
+                    help="Number of years before secondary economic effects manifest."
+                )
+
+            with col_ctrl2:
+                st.subheader("⚡ Quick Scenarios")
+                st.markdown("Select a predefined scenario to instantly configure the sliders:")
+
+                sc_col1, sc_col2 = st.columns(2)
+
+                sc_col1.button("📉 2008 Credit Crunch", key="sandbox_btn_crunch", on_click=trigger_crunch, use_container_width=True)
+                sc_col2.button("🛢️ Supply Chain Shock (Oil Spike)", key="sandbox_btn_oil", on_click=trigger_oil, use_container_width=True)
+                sc_col1.button("💸 Post-Pandemic Stimulus", key="sandbox_btn_stim", on_click=trigger_stimulus, use_container_width=True)
+                sc_col2.button("🏦 Sovereign Debt Crisis", key="sandbox_btn_crisis", on_click=trigger_crisis, use_container_width=True)
+                st.button("🔄 Reset Sandbox", key="sandbox_btn_reset", on_click=trigger_reset, use_container_width=True)
+
+                st.markdown("""
+                > **Sandbox Mechanisms:**
+                > - **Interest Rate Shock**: Adjusts baseline rate directly. Also lowers GDP growth ($-0.25 \\times \\text{shock}$) and Inflation ($-0.15 \\times \\text{shock}$) after the specified lag.
+                > - **GDP Shock**: Adjusts baseline real growth. Also increases Inflation ($+0.20 \\times \\text{shock}$) and Interest Rates ($+0.10 \\times \\text{shock}$) after the lag.
+                > - **Govt Debt Shock**: Adjusts gross debt ratio. Also raises Interest Rates ($+0.15 \\times \\text{shock}$) and lowers GDP growth ($-0.10 \\times \\text{shock}$) after the lag.
+                """)
+
+            st.divider()
+
+            # Apply calculations
+            ir_val = ir_shock / 100.0
+
+            shocked_df = tidy_df.copy()
+            if ir_shock != 0.0:
+                shocked_df = simulate_policy_shock(shocked_df, sel_country, "Interest Rates", ir_val, lag_years)
+            if gdp_shock != 0.0:
+                shocked_df = simulate_policy_shock(shocked_df, sel_country, "GDP Growth", gdp_shock, lag_years)
+            if debt_shock != 0.0:
+                shocked_df = simulate_policy_shock(shocked_df, sel_country, "Government Debt", debt_shock, lag_years)
+
+            # Recession Risk comparison
+            risk_base = compute_country_risk(tidy_df, sel_country)
+            risk_shocked = compute_country_risk(shocked_df, sel_country)
+
+            st.subheader("🚦 Recession Risk Gauge — Before vs. After")
+            col_g1, col_g2 = st.columns(2)
+            with col_g1:
+                st.markdown("<h4 style='text-align: center; color: #2c7bb6;'>Baseline Forecast Risk</h4>", unsafe_allow_html=True)
+                fig_base = build_risk_gauge_fig(risk_base)
+                if fig_base:
+                    st.plotly_chart(fig_base, use_container_width=True, key="sandbox_gauge_base")
+            with col_g2:
+                st.markdown("<h4 style='text-align: center; color: #d7191c;'>Simulated Shock Risk</h4>", unsafe_allow_html=True)
+                fig_shocked = build_risk_gauge_fig(risk_shocked)
+                if fig_shocked:
+                    st.plotly_chart(fig_shocked, use_container_width=True, key="sandbox_gauge_shocked")
+
+            # Details of risk score changes
+            st.markdown(f"**Risk Summary Change:**")
+            st.write(f"- **Baseline Score**: `{risk_base['score']}/17` ({risk_base['level']} Risk) | {risk_base['summary']}")
+            st.write(f"- **Simulated Score**: `{risk_shocked['score']}/17` ({risk_shocked['level']} Risk) | {risk_shocked['summary']}")
+
+            st.divider()
+
+            # Comparison plots
+            st.subheader("📈 Forecast Trajectories Comparison")
+
+            # Helper to build comparison charts
+            def build_sandbox_comparison_chart(df_b, df_s, country, indicator):
+                import plotly.graph_objects as go
+
+                # Helper to map standard name to actual
+                country_indicators = df_b[df_b["country"] == country]["indicator"].unique()
+                def get_actual_indicator(std_name: str) -> str:
+                    candidates = {
+                        "Interest Rates": [
+                            "Effective Federal Funds Rate",
+                            "ECB Main Refinancing Operations Rate",
+                            "Policy Interest Rate (%)"
+                        ],
+                        "GDP Growth": [
+                            "GDP growth, real (annual %)",
+                            "GDP growth rate (annual %, seasonally adjusted)"
+                        ],
+                        "Government Debt": [
+                            "General government gross debt (% of GDP)",
+                            "Central government debt, total (% of GDP)"
+                        ],
+                        "Inflation": [
+                            "Inflation, average consumer prices (annual %)",
+                            "Inflation, consumer prices (annual %)",
+                            "HICP Inflation (Eurozone, annual %)"
+                        ]
+                    }.get(std_name, [std_name])
+                    for cand in candidates:
+                        if cand in country_indicators:
+                            return cand
+                    return candidates[0]
+
+                target_ind = get_actual_indicator(indicator)
+                base_data = df_b[(df_b["country"] == country) & (df_b["indicator"] == target_ind)].sort_values("year")
+                shock_data = df_s[(df_s["country"] == country) & (df_s["indicator"] == target_ind)].sort_values("year")
+
+                if base_data.empty:
+                    return None
+
+                unit = INDICATOR_UNITS.get(target_ind, "%")
+                short = INDICATOR_SHORT.get(target_ind, target_ind)
+
+                fig = go.Figure()
+
+                # History (pre-2024)
+                hist_df = base_data[base_data["year"] < 2024]
+                if not hist_df.empty:
+                    fig.add_trace(go.Scatter(
+                        x=hist_df["year"],
+                        y=hist_df["value"],
+                        mode="lines+markers",
+                        name="Historical Data",
+                        line=dict(color="#555555", width=2),
+                        marker=dict(size=4),
+                        hovertemplate="Year: %{x}<br>Actual: %{y:.2f} " + unit + "<extra></extra>"
+                    ))
+
+                # Baseline forecast (2023 onwards)
+                base_fc = base_data[base_data["year"] >= 2023]
+                if not base_fc.empty:
+                    fig.add_trace(go.Scatter(
+                        x=base_fc["year"],
+                        y=base_fc["value"],
+                        mode="lines+markers",
+                        name="Baseline Forecast",
+                        line=dict(color="#2c7bb6", width=2.5),
+                        marker=dict(size=5),
+                        hovertemplate="Year: %{x}<br>Baseline: %{y:.2f} " + unit + "<extra></extra>"
+                    ))
+
+                # Shocked forecast (2023 onwards)
+                shock_fc = shock_data[shock_data["year"] >= 2023]
+                if not shock_fc.empty:
+                    fig.add_trace(go.Scatter(
+                        x=shock_fc["year"],
+                        y=shock_fc["value"],
+                        mode="lines+markers",
+                        name="Simulated Shock",
+                        line=dict(color="#d7191c", width=2.5, dash="dash"),
+                        marker=dict(size=5, symbol="diamond"),
+                        hovertemplate="Year: %{x}<br>Simulated: %{y:.2f} " + unit + "<extra></extra>"
+                    ))
+
+                fig.add_vline(x=2024, line_dash="dot", line_color="#888888", annotation_text="Shock Starts (2024)")
+                fig.update_layout(
+                    title=f"{short} Comparison",
+                    xaxis_title="Year",
+                    yaxis_title=f"{short} ({unit})" if unit else short,
+                    template="plotly_white",
+                    height=300,
+                    margin=dict(l=40, r=20, t=40, b=40),
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                return fig
+
+            # Show GDP and Inflation side by side, and Interest Rates and Debt below
+            col_p1, col_p2 = st.columns(2)
+            with col_p1:
+                fig_gdp = build_sandbox_comparison_chart(tidy_df, shocked_df, sel_country, "GDP Growth")
+                if fig_gdp:
+                    st.plotly_chart(fig_gdp, use_container_width=True, key="sandbox_plot_gdp")
+            with col_p2:
+                fig_inf = build_sandbox_comparison_chart(tidy_df, shocked_df, sel_country, "Inflation")
+                if fig_inf:
+                    st.plotly_chart(fig_inf, use_container_width=True, key="sandbox_plot_inf")
+
+            col_p3, col_p4 = st.columns(2)
+            with col_p3:
+                fig_ir = build_sandbox_comparison_chart(tidy_df, shocked_df, sel_country, "Interest Rates")
+                if fig_ir:
+                    st.plotly_chart(fig_ir, use_container_width=True, key="sandbox_plot_ir")
+            with col_p4:
+                fig_debt = build_sandbox_comparison_chart(tidy_df, shocked_df, sel_country, "Government Debt")
+                if fig_debt:
+                    st.plotly_chart(fig_debt, use_container_width=True, key="sandbox_plot_debt")
+
+            st.divider()
+
+            # Agent analysis section
+            st.subheader("🤖 Historical Policy Critique Agent")
+            st.caption("Ask the agent to critique your custom simulation by looking up historical central bank cycles.")
+
+            if st.button("🚀 Analyze Simulation with Agent", key="sandbox_btn_analyze", type="primary"):
+                def get_actual_indicator(std_name: str) -> str:
+                    country_indicators = tidy_df[tidy_df["country"] == sel_country]["indicator"].unique()
+                    candidates = {
+                        "Interest Rates": [
+                            "Effective Federal Funds Rate",
+                            "ECB Main Refinancing Operations Rate",
+                            "Policy Interest Rate (%)"
+                        ],
+                        "GDP Growth": [
+                            "GDP growth, real (annual %)",
+                            "GDP growth rate (annual %, seasonally adjusted)"
+                        ],
+                        "Government Debt": [
+                            "General government gross debt (% of GDP)",
+                            "Central government debt, total (% of GDP)"
+                        ],
+                        "Inflation": [
+                            "Inflation, average consumer prices (annual %)",
+                            "Inflation, consumer prices (annual %)",
+                            "HICP Inflation (Eurozone, annual %)"
+                        ]
+                    }.get(std_name, [std_name])
+                    for cand in candidates:
+                        if cand in country_indicators:
+                            return cand
+                    return candidates[0]
+
+                target_ind = get_actual_indicator("GDP Growth")
+                base_series = tidy_df[(tidy_df["country"] == sel_country) & (tidy_df["indicator"] == target_ind) & (tidy_df["year"] >= 2024)].sort_values("year")
+                shock_series = shocked_df[(shocked_df["country"] == sel_country) & (shocked_df["indicator"] == target_ind) & (shocked_df["year"] >= 2024)].sort_values("year")
+
+                baseline_records = base_series[["year", "value"]].to_dict("records")
+                shocked_records = shock_series[["year", "value"]].to_dict("records")
+
+                sim_payload = {
+                    "country": sel_country,
+                    "shocked_indicator": "Interest Rates" if ir_shock != 0.0 else ("GDP Growth" if gdp_shock != 0.0 else "Government Debt"),
+                    "shock_value": f"{ir_shock:+.0f} bps" if ir_shock != 0.0 else (f"{gdp_shock:+.1f}%" if gdp_shock != 0.0 else f"{debt_shock:+.1f}% of GDP"),
+                    "baseline_risk": float(risk_base["score"]),
+                    "baseline_level": risk_base["level"],
+                    "shocked_risk": float(risk_shocked["score"]),
+                    "shocked_level": risk_shocked["level"],
+                    "baseline_forecast": baseline_records[:5],
+                    "shocked_forecast": shocked_records[:5]
+                }
+
+                retrieval_query = f"Effects of policy shocks, interest rate tightening, debt spikes, and historical economic crises in {sel_country}"
+
+                with st.spinner("Retrieving historical case studies and running agent synthesis..."):
+                    wf = _get_workflow()
+                    plan = wf.planner.plan(retrieval_query)
+                    plan["retrieval_strategy"] = "hybrid"
+
+                    vector_results = wf.vector_agent.retrieve({"query": retrieval_query, "plan": plan}).get("vector_results", [])
+                    graph_results  = wf.graph_agent.retrieve({"query": retrieval_query, "plan": plan}).get("graph_results",  [])
+
+                    ctx = {
+                        "vector_results": vector_results,
+                        "graph_results": graph_results,
+                        "simulation_data": sim_payload
+                    }
+
+                    prompt = (
+                        f"Critique the macroeconomic simulation for {sel_country}. "
+                        f"The user shocked {sim_payload['shocked_indicator']} by {sim_payload['shock_value']}. "
+                        f"This changed the Recession Risk score from {sim_payload['baseline_risk']:.1f}/17 to {sim_payload['shocked_risk']:.1f}/17. "
+                        f"Compare the mathematical outcomes against matching historical policy cycles or structural crises in G20 economies (e.g. Volcker shock, debt crises, demand shocks)."
+                    )
+
+                    answer_data = wf.answer_agent.generate_answer(prompt, ctx)
+
+                st.session_state["sandbox_critique"] = answer_data
+                st.rerun()
+
+            critique = st.session_state.get("sandbox_critique")
+            if critique:
+                st.divider()
+                st.markdown("### 📄 Agent Critique Analysis")
+                st.markdown(critique.get("answer", "No analysis generated."))
+
+                sources = critique.get("sources", [])
+                if sources:
+                    st.markdown("---")
+                    st.write("**Grounded Sources:**")
+                    for s in sources:
+                        st.markdown(f'<span class="source-tag">{s}</span>', unsafe_allow_html=True)
+
+                st.markdown("---")
+                _render_answer_tabs(critique, key_suffix="sandbox")
+

@@ -66,6 +66,7 @@ INDICATOR_UNITS: Dict[str, str] = {
     "Research and development expenditure (% of GDP)":      "% of GDP",
     "Access to electricity (% of population)":              "%",
     "CO2 emissions (metric tons per capita)":               "tons/capita",
+    "Policy Interest Rate (%)":                             "%",
 }
 
 INDICATOR_SHORT: Dict[str, str] = {
@@ -98,6 +99,7 @@ INDICATOR_SHORT: Dict[str, str] = {
     "Research and development expenditure (% of GDP)":      "R&D Spending",
     "Access to electricity (% of population)":              "Electricity Access",
     "CO2 emissions (metric tons per capita)":               "CO2 per Capita",
+    "Policy Interest Rate (%)":                             "Policy Rate",
 }
 
 
@@ -410,3 +412,159 @@ def forecast_series(
     })
 
     return history_df, forecast_df
+
+
+def simulate_policy_shock(
+    df: pd.DataFrame,
+    country: str,
+    indicator: str,  # "Interest Rates", "GDP Growth", "Government Debt", "Inflation"
+    shock_value: float,
+    lag_years: int = 1,
+) -> pd.DataFrame:
+    """
+    Simulates a macroeconomic policy shock and propagates the effects through 
+    standard economic correlations in the projection phase (years >= 2024).
+    """
+    df_shocked = df.copy()
+
+    # 1. Check if the country has any indicators in df
+    country_df = df_shocked[df_shocked["country"] == country]
+    if country_df.empty:
+        return df_shocked
+
+    country_indicators = country_df["indicator"].unique()
+
+    # Helper to resolve standard keys to actual indicators
+    def get_actual_indicator(std_name: str) -> str:
+        candidates = {
+            "Interest Rates": [
+                "Effective Federal Funds Rate",
+                "ECB Main Refinancing Operations Rate",
+                "Policy Interest Rate (%)"
+            ],
+            "GDP Growth": [
+                "GDP growth, real (annual %)",
+                "GDP growth rate (annual %, seasonally adjusted)"
+            ],
+            "Government Debt": [
+                "General government gross debt (% of GDP)",
+                "Central government debt, total (% of GDP)"
+            ],
+            "Inflation": [
+                "Inflation, average consumer prices (annual %)",
+                "Inflation, consumer prices (annual %)",
+                "HICP Inflation (Eurozone, annual %)"
+            ]
+        }.get(std_name, [std_name])
+
+        for cand in candidates:
+            if cand in country_indicators:
+                return cand
+        # Fallback if none found - return the first candidate
+        return candidates[0]
+
+    # Initialize virtual interest rate if it is missing and we need it
+    actual_ir = None
+    for cand in ["Effective Federal Funds Rate", "ECB Main Refinancing Operations Rate"]:
+        if cand in country_indicators:
+            actual_ir = cand
+            break
+
+    if not actual_ir:
+        # Create virtual Policy Interest Rate (%) if it doesn't exist
+        if "Policy Interest Rate (%)" not in country_indicators:
+            # Find years from GDP growth
+            gdp_ind = get_actual_indicator("GDP Growth")
+            gdp_series = df_shocked[(df_shocked["country"] == country) & (df_shocked["indicator"] == gdp_ind)]
+            if not gdp_series.empty:
+                years = gdp_series["year"].unique()
+                rows = []
+                for y in years:
+                    rows.append({
+                        "country": country,
+                        "indicator": "Policy Interest Rate (%)",
+                        "year": y,
+                        "value": 4.0,
+                        "source": "Virtual Sandbox Baseline"
+                    })
+                df_shocked = pd.concat([df_shocked, pd.DataFrame(rows)], ignore_index=True)
+                # Re-read indicators
+                country_indicators = df_shocked[df_shocked["country"] == country]["indicator"].unique()
+
+    # Get actual indicator name for the shock target
+    target_ind = get_actual_indicator(indicator)
+
+    # 2. Apply direct shock in the projection phase (years >= 2024)
+    target_mask = (
+        (df_shocked["country"] == country) & 
+        (df_shocked["indicator"] == target_ind) & 
+        (df_shocked["year"] >= 2024)
+    )
+    df_shocked.loc[target_mask, "value"] += shock_value
+
+    # 3. Propagate standard economic correlations
+    # A. Interest Rates Shock
+    if indicator == "Interest Rates":
+        gdp_ind = get_actual_indicator("GDP Growth")
+        inf_ind = get_actual_indicator("Inflation")
+
+        # GDP growth decreases by 0.25 * shock_value starting from (2024 + lag_years)
+        gdp_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == gdp_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[gdp_mask, "value"] -= 0.25 * shock_value
+
+        # Inflation decreases by 0.15 * shock_value starting from (2024 + lag_years)
+        inf_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == inf_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[inf_mask, "value"] -= 0.15 * shock_value
+
+    # B. Government Debt Shock
+    elif indicator == "Government Debt":
+        ir_ind = get_actual_indicator("Interest Rates")
+        gdp_ind = get_actual_indicator("GDP Growth")
+
+        # Interest Rates increase by 0.15 * shock_value starting from (2024 + lag_years)
+        ir_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == ir_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[ir_mask, "value"] += 0.15 * shock_value
+
+        # GDP Growth decreases by 0.1 * shock_value starting from (2024 + lag_years)
+        gdp_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == gdp_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[gdp_mask, "value"] -= 0.1 * shock_value
+
+    # C. GDP Growth Shock
+    elif indicator == "GDP Growth":
+        inf_ind = get_actual_indicator("Inflation")
+        ir_ind = get_actual_indicator("Interest Rates")
+
+        # Inflation increases by 0.2 * shock_value starting from (2024 + lag_years)
+        inf_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == inf_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[inf_mask, "value"] += 0.2 * shock_value
+
+        # Interest Rates increase by 0.1 * shock_value starting from (2024 + lag_years)
+        ir_mask = (
+            (df_shocked["country"] == country) & 
+            (df_shocked["indicator"] == ir_ind) & 
+            (df_shocked["year"] >= 2024 + lag_years)
+        )
+        df_shocked.loc[ir_mask, "value"] += 0.1 * shock_value
+
+    return df_shocked
+

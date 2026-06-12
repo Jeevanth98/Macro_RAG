@@ -35,7 +35,7 @@ class GraphBuilder:
                      and sufficient for a production graph.
         """
         total = len(chunks)
-        print(f"Building knowledge graph from {total} chunks …")
+        print(f"Building knowledge graph from {total} chunks ...")
 
         for i, chunk in enumerate(chunks):
             try:
@@ -71,7 +71,7 @@ class GraphBuilder:
 
             if (i + 1) % save_every == 0 or (i + 1) == total:
                 nx_graph.save()
-                print(f"  Processed {i+1}/{total} chunks …")
+                print(f"  Processed {i+1}/{total} chunks ...")
 
         print(f"Graph build complete: {nx_graph.node_count} nodes, {nx_graph.edge_count} edges")
 

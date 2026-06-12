@@ -148,10 +148,10 @@ def load_imf_data() -> List[Dict[str, Any]]:
     all_docs: List[Dict[str, Any]] = []
 
     for code, name in IMF_INDICATORS.items():
-        print(f"  Fetching IMF WEO: {name} …")
+        print(f"  Fetching IMF WEO: {name} ...")
         docs = _fetch_imf_indicator(code, name)
         all_docs.extend(docs)
-        print(f"    → {len(docs)} country documents")
+        print(f"    -> {len(docs)} country documents")
         time.sleep(0.3)   # be polite to the free API
 
     return all_docs

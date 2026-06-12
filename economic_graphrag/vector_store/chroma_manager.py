@@ -77,7 +77,7 @@ def _build_store() -> BaseVectorStore:
         return _ChromaVectorStore()
     except ImportError:
         from economic_graphrag.vector_store.simple_vector_store import SimpleVectorStore
-        print("chromadb not available — using SimpleVectorStore fallback.")
+        print("chromadb not available - using SimpleVectorStore fallback.")
         return SimpleVectorStore()
 
 

@@ -106,9 +106,9 @@ def load_worldbank_data() -> List[Dict[str, Any]]:
     all_docs: List[Dict[str, Any]] = []
 
     for code, name in INDICATORS.items():
-        print(f"  Fetching {name} for all G20 countries …")
+        print(f"  Fetching {name} for all G20 countries ...")
         docs = _fetch_indicator_batch(code, name)
         all_docs.extend(docs)
-        print(f"    → {len(docs)} country documents")
+        print(f"    -> {len(docs)} country documents")
 
     return all_docs
