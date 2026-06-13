@@ -21,12 +21,12 @@ from economic_graphrag.analytics.data_processor import (
     INDICATOR_SHORT,
     INDICATOR_UNITS,
 )
+from economic_graphrag.viz.charts import apply_dark_theme
 
 # ── Colour palettes ────────────────────────────────────────────────────────────
-_DIVERGING  = "RdYlGn"
-_SEQUENTIAL = "Blues"
+_DIVERGING  = "RdBu"
+_SEQUENTIAL = "Plasma"
 _VIRIDIS    = "Viridis"
-_PLOTLY_WH  = "plotly_white"
 
 
 # ── Choropleth world map ───────────────────────────────────────────────────────
@@ -70,12 +70,11 @@ def build_choropleth_map(
         height=420,
     )
     fig.update_layout(
-        template=_PLOTLY_WH,
         margin=dict(l=0, r=0, t=45, b=0),
         coloraxis_colorbar=dict(title=unit or short, len=0.6),
-        geo=dict(showframe=False, showcoastlines=True, projection_type="natural earth"),
+        geo=dict(showframe=False, showcoastlines=True, projection_type="natural earth", bgcolor="rgba(0,0,0,0)"),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Country ranking bar chart ──────────────────────────────────────────────────
@@ -115,11 +114,10 @@ def build_ranking_chart(
         title=f"{short} Rankings (≈{year})",
         xaxis_title=unit or short,
         yaxis=dict(autorange="reversed"),
-        template=_PLOTLY_WH,
         height=max(320, len(df) * 24),
         margin=dict(l=10, r=60, t=45, b=20),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Correlation heatmap ────────────────────────────────────────────────────────
@@ -150,12 +148,11 @@ def build_correlation_heatmap(corr_df: pd.DataFrame) -> Optional[Any]:
     ))
     fig.update_layout(
         title="Indicator Correlation Matrix (across G20 countries)",
-        template=_PLOTLY_WH,
         height=420,
         margin=dict(l=60, r=20, t=60, b=60),
         xaxis=dict(tickangle=-35),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Scatter plot (Phillips Curve, Okun's Law, etc.) ───────────────────────────
@@ -239,12 +236,11 @@ def build_scatter_plot(
         title=title or f"{x_short} vs {y_short} (≈{year})",
         xaxis_title=f"{x_short} ({x_unit})" if x_unit else x_short,
         yaxis_title=f"{y_short} ({y_unit})" if y_unit else y_short,
-        template=_PLOTLY_WH,
         height=400,
         margin=dict(l=50, r=20, t=55, b=40),
         showlegend=False,
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Forecast chart ────────────────────────────────────────────────────────────
@@ -313,12 +309,11 @@ def build_forecast_chart(
         title=f"{country} — {short}: Historical + 5-Year Forecast",
         xaxis_title="Year",
         yaxis_title=f"{short} ({unit})" if unit else short,
-        template=_PLOTLY_WH,
         height=400,
         margin=dict(l=50, r=20, t=60, b=40),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Country radar chart ────────────────────────────────────────────────────────
@@ -409,14 +404,16 @@ def build_country_radar(
         ))
 
     fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, 100]),
+            bgcolor="rgba(0,0,0,0)",
+        ),
         title=f"{country} — Economic Profile (normalized)",
-        template=_PLOTLY_WH,
         height=380,
         margin=dict(l=30, r=30, t=60, b=30),
         legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Indicator cross-country heatmap ───────────────────────────────────────────
@@ -454,12 +451,11 @@ def build_indicator_heatmap(
     ))
     fig.update_layout(
         title=f"{short} — Country × Year Heatmap",
-        template=_PLOTLY_WH,
         height=max(300, len(df) * 22 + 80),
         margin=dict(l=10, r=10, t=50, b=40),
         xaxis=dict(tickangle=-45),
     )
-    return fig
+    return apply_dark_theme(fig)
 
 
 # ── Multi-indicator country comparison table chart ────────────────────────────
@@ -539,8 +535,7 @@ def build_comparison_matrix_chart(
     ))
     fig.update_layout(
         title=f"G20 Economic Indicator Comparison Matrix (≈{year})",
-        template=_PLOTLY_WH,
         height=max(400, len(countries) * 26 + 80),
         margin=dict(l=0, r=0, t=50, b=0),
     )
-    return fig
+    return apply_dark_theme(fig)

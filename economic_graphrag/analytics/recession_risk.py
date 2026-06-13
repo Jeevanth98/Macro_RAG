@@ -255,13 +255,13 @@ def build_risk_gauge_fig(country_risk: Dict[str, Any]) -> Any:
                           "tickvals": [0, 4, 8, 12, 17],
                           "ticktext": ["0", "4", "8", "12", "17"]},
                 "bar": {"color": color, "thickness": 0.35},
-                "bgcolor": "white",
+                "bgcolor": "rgba(0,0,0,0)",
                 "borderwidth": 1,
-                "bordercolor": "#ddd",
+                "bordercolor": "rgba(255,255,255,0.1)",
                 "steps": [
-                    {"range": [0,  4], "color": "#d4edda"},
-                    {"range": [4,  8], "color": "#fff3cd"},
-                    {"range": [8, 17], "color": "#f8d7da"},
+                    {"range": [0,  4], "color": "rgba(40,167,69,0.25)"},
+                    {"range": [4,  8], "color": "rgba(255,193,7,0.25)"},
+                    {"range": [8, 17], "color": "rgba(220,53,69,0.25)"},
                 ],
                 "threshold": {
                     "line": {"color": color, "width": 3},
@@ -274,8 +274,8 @@ def build_risk_gauge_fig(country_risk: Dict[str, Any]) -> Any:
         fig.update_layout(
             height=220,
             margin=dict(l=15, r=15, t=55, b=15),
-            paper_bgcolor="white",
-            font={"family": "sans-serif"},
+            paper_bgcolor="rgba(0,0,0,0)",
+            font={"family": "Inter, sans-serif", "color": "#E2E8F0"},
         )
         return fig
     except Exception:
@@ -307,11 +307,14 @@ def build_risk_radar_fig(country_risk: Dict[str, Any]) -> Any:
             polar=dict(
                 radialaxis=dict(visible=True, range=[0, 100], ticksuffix="%",
                                 tickvals=[0, 25, 50, 75, 100]),
-                angularaxis=dict(tickfont=dict(size=11)),
+                angularaxis=dict(tickfont=dict(size=11, color="#E2E8F0")),
+                bgcolor="rgba(0,0,0,0)",
             ),
             showlegend=False,
             height=280,
             margin=dict(l=30, r=30, t=30, b=30),
+            paper_bgcolor="rgba(0,0,0,0)",
+            font={"family": "Inter, sans-serif", "color": "#E2E8F0"},
         )
         return fig
     except Exception:

@@ -6,7 +6,7 @@ Two-tier:
   2. Rule-based structured synthesis (never returns an empty answer)
 """
 import textwrap
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from economic_graphrag.llm.llm_factory import FallbackLLMClient
 from economic_graphrag.llm.json_utils import LLMJSONParseError, parse_json_object

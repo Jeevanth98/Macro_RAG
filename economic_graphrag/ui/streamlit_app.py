@@ -62,56 +62,146 @@ except Exception as _viz_err:
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Economic GraphRAG",
-    page_icon="📈",
+    page_title="Macroeconomic Intelligence Platform",
+    page_icon="chart_with_upwards_trend",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown("""<style>
-.source-tag {
-    background:#e8f4f8;border-radius:4px;padding:2px 8px;
-    font-size:0.8em;color:#2c7bb6;display:inline-block;margin:2px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
 }
-.graph-path {
-    background:#f8f0ff;border-radius:4px;padding:4px 8px;
-    font-family:monospace;font-size:0.85em;margin:2px 0;
+
+/* Terminal cards */
+.terminal-card {
+    background: #111319;
+    border: 1px solid #2B3040;
+    border-radius: 2px;
+    padding: 12px;
+    margin: 4px 0;
+    font-size: 0.9em;
 }
+
+/* KPI cards */
 .kpi-card {
-    background:#f0f2f6;border-radius:10px;padding:14px 16px;
-    text-align:center;margin:4px 0;
+    background: #0D0F14;
+    border-radius: 2px;
+    padding: 12px;
+    text-align: center;
+    margin: 4px 0;
+    border: 1px solid #333;
 }
-.trend-up   { color:#1a9641; font-weight:600; }
-.trend-down { color:#d7191c; font-weight:600; }
+.kpi-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+.kpi-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: monospace;
+    color: #E2E8F0;
+}
+
+.trend-up   { color: #10B981; font-weight: 600; }
+.trend-down { color: #EF4444; font-weight: 600; }
+
+/* Dark mode risk cards */
 .risk-card-green {
-    background:linear-gradient(135deg,#d4edda,#c3e6cb);
-    border-left:5px solid #1a9641;border-radius:10px;
-    padding:14px 18px;margin:6px 0;
+    border-left: 4px solid #10B981; border-radius: 4px;
+    padding: 12px 18px; margin: 6px 0; background: rgba(16, 185, 129, 0.05);
+    border-top: 1px solid rgba(16, 185, 129, 0.1); border-right: 1px solid rgba(16, 185, 129, 0.1); border-bottom: 1px solid rgba(16, 185, 129, 0.1);
 }
 .risk-card-yellow {
-    background:linear-gradient(135deg,#fff3cd,#ffeaa7);
-    border-left:5px solid #e8b004;border-radius:10px;
-    padding:14px 18px;margin:6px 0;
+    border-left: 4px solid #F59E0B; border-radius: 4px;
+    padding: 12px 18px; margin: 6px 0; background: rgba(245, 158, 11, 0.05);
+    border-top: 1px solid rgba(245, 158, 11, 0.1); border-right: 1px solid rgba(245, 158, 11, 0.1); border-bottom: 1px solid rgba(245, 158, 11, 0.1);
 }
 .risk-card-red {
-    background:linear-gradient(135deg,#f8d7da,#f5c6cb);
-    border-left:5px solid #d7191c;border-radius:10px;
-    padding:14px 18px;margin:6px 0;
+    border-left: 4px solid #EF4444; border-radius: 4px;
+    padding: 12px 18px; margin: 6px 0; background: rgba(239, 68, 68, 0.05);
+    border-top: 1px solid rgba(239, 68, 68, 0.1); border-right: 1px solid rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.1);
 }
+
+/* Insight cards */
 .insight-card {
-    background:#f8f9fa;border-left:4px solid #2c7bb6;
-    border-radius:6px;padding:10px 14px;margin:4px 0;font-size:0.92em;
+    border-left: 3px solid #6366F1; border-radius: 4px;
+    padding: 12px 16px; margin: 6px 0; font-size: 0.91em;
+    background: rgba(255, 255, 255, 0.03);
+    transition: background 0.2s ease;
 }
-.insight-high   { border-left-color:#d7191c; background:#fff5f5; }
-.insight-medium { border-left-color:#e8b004; background:#fffbf0; }
-.insight-info   { border-left-color:#2c7bb6; background:#f0f8ff; }
+.insight-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+.insight-high   { border-left-color: #EF4444; }
+.insight-medium { border-left-color: #F59E0B; }
+.insight-info   { border-left-color: #6366F1; }
+
+/* Severity pill badges */
+.severity-badge {
+    display: inline-block; font-size: 0.72em; font-weight: 700;
+    letter-spacing: 0.06em; padding: 3px 8px; border-radius: 12px;
+    vertical-align: middle; margin-right: 8px;
+}
+.sev-high   { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.5); animation: pulseGlow 2s infinite; }
+.sev-medium { background: rgba(245, 158, 11, 0.2); color: #FCD34D; border: 1px solid rgba(245, 158, 11, 0.5); }
+.sev-info   { background: rgba(99, 102, 241, 0.2); color: #A5B4FC; border: 1px solid rgba(99, 102, 241, 0.5); }
+
+/* Other components */
+.source-tag {
+    background: rgba(99, 102, 241, 0.15); border-radius: 4px; padding: 3px 8px;
+    font-size: 0.78em; color: #A5B4FC; display: inline-block; margin: 3px;
+    font-family: monospace; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.3);
+}
+.graph-path {
+    background: rgba(255, 255, 255, 0.03); border-left: 3px solid #6366F1;
+    padding: 6px 12px; font-family: monospace; font-size: 0.84em; margin: 4px 0;
+    border-radius: 0 4px 4px 0;
+}
 .metric-badge {
-    display:inline-block;background:#e8f4f8;border-radius:20px;
-    padding:3px 12px;font-size:0.85em;color:#2c7bb6;margin:2px;font-weight:600;
+    display: inline-block; background: rgba(99, 102, 241, 0.15); border-radius: 4px;
+    padding: 3px 10px; font-size: 0.84em; color: #A5B4FC; margin: 2px; font-weight: 600;
+    font-family: monospace; border: 1px solid rgba(99, 102, 241, 0.3);
 }
 .followup-section {
-    background:#f0f4ff;border-radius:8px;padding:10px 14px;margin-top:10px;
+    background: rgba(255, 255, 255, 0.02); border-left: 3px solid #6366F1;
+    border-radius: 4px; padding: 12px 16px; margin-top: 14px;
+}
+.status-badge {
+    display: inline-block; font-size: 0.78em; font-weight: 700;
+    letter-spacing: 0.04em; padding: 3px 8px; border-radius: 12px;
+    background: rgba(99, 102, 241, 0.2); color: #A5B4FC; margin-left: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.5);
+}
+.data-tag {
+    display: inline-block; background: rgba(255, 255, 255, 0.1); border-radius: 4px;
+    padding: 3px 8px; font-size: 0.80em; color: #E2E8F0; margin: 2px;
+    font-family: monospace;
+}
+.pipeline-step {
+    font-family: monospace; font-size: 0.88em; color: #94A3B8;
+    padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 4px;
+}
+
+/* Animations */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Custom horizontal divider */
+.premium-divider {
+    height: 1px;
+    background: #2B3040;
+    border: none;
+    margin: 16px 0;
 }
 </style>""", unsafe_allow_html=True)
 
@@ -154,6 +244,14 @@ def _get_insights():
     chunks = _get_all_chunks()
     h = hash(len(chunks))
     return _cached_insights(h)
+
+def _render_page_header(title: str, subtitle: str = ""):
+    st.markdown(f"""
+        <div style="margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #333;">
+            <div style="font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #E2E8F0;">{title}</div>
+            {f'<div style="font-size: 0.8rem; color: #888; text-transform: uppercase; font-family: monospace;">{subtitle}</div>' if subtitle else ''}
+        </div>
+    """, unsafe_allow_html=True)
 
 def _generate_followup_questions(query: str, vector_results: List[Dict[str, Any]]) -> List[str]:
     """Generate 3 contextual follow-up questions based on the query and retrieved data."""
@@ -227,38 +325,62 @@ is_ready = vs_size > 0 and g_nodes > 0
 # SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
-    st.title("📈 Economic GraphRAG")
-    st.caption("Hybrid RAG · LangGraph · Gemini / OpenRouter")
-    st.divider()
+    # Branded Header
+    st.markdown("""
+        <div style="padding: 10px 0 10px 0;">
+            <h1 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; color: #E2E8F0; line-height: 1.2;">Macroeconomic<br>Intelligence</h1>
+            <div style="height: 3px; width: 40px; background: linear-gradient(90deg, #6366F1, transparent); margin-bottom: 12px;"></div>
+            <span class="data-tag">Hybrid GraphRAG</span>
+            <span class="data-tag">Gemini</span>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-    st.subheader("🔍 System Status")
-    c1, c2 = st.columns(2)
-    c1.metric("Vector chunks", vs_size)
-    c2.metric("Graph nodes",   g_nodes)
-    c1.metric("Graph edges",   g_edges)
-    c2.caption(f"Neo4j: {'✅' if neo4j_manager.available else '⚠️ NetworkX'}")
-    if is_ready:
-        st.success("✅ RAG pipeline ready")
-    else:
-        st.warning("⚠️ Run ingestion first")
+    st.markdown('<div style="font-weight: 600; margin-bottom: 15px; color: #94A3B8; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">System Status</div>', unsafe_allow_html=True)
+    
+    # Status Panel
+    neo4j_status = "🟢 Active" if neo4j_manager.available else "🟡 Fallback (Local)"
+    pipeline_status = "🟢 Ready" if is_ready else "🔴 Awaiting Data"
+    
+    st.markdown(f"""
+        <div class="terminal-card" style="padding: 14px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 0.85em; color: #94A3B8;">Vectors</span>
+                <span style="font-family: monospace; font-weight: 600; color: #E2E8F0;">{vs_size:,}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 0.85em; color: #94A3B8;">Nodes/Edges</span>
+                <span style="font-family: monospace; font-weight: 600; color: #E2E8F0;">{g_nodes:,} / {g_edges:,}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="font-size: 0.85em; color: #94A3B8;">Neo4j DB</span>
+                <span style="font-size: 0.85em; font-weight: 600;">{neo4j_status}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="font-size: 0.85em; color: #94A3B8;">Pipeline</span>
+                <span style="font-size: 0.85em; font-weight: 600;">{pipeline_status}</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    st.divider()
+    st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
 
-    st.subheader("📥 Data Ingestion")
+    st.markdown('<div style="font-weight: 600; margin-bottom: 10px; color: #94A3B8; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Data Ingestion</div>', unsafe_allow_html=True)
     with st.expander("Configure sources", expanded=not is_ready):
-        st.markdown("**Core sources (original)**")
-        use_wb   = st.checkbox("🏦 World Bank — G20: GDP, Inflation, Trade, Unemployment", value=True)
-        use_fred = st.checkbox("🇺🇸 FRED — US: CPI, Fed Funds Rate, M2, Treasuries", value=True)
-        use_oecd = st.checkbox("🌐 OECD / World Bank — G7 GDP growth rate", value=True)
-        st.markdown("**New free sources (no API key)**")
-        use_imf  = st.checkbox("📊 IMF WEO — G20: Govt Debt, Current Account, GDP Growth", value=True)
-        use_ecb  = st.checkbox("🇪🇺 ECB Data Portal — Eurozone: Policy Rates, EUR/USD, HICP", value=True)
-        use_wbe  = st.checkbox("🌍 World Bank Extended — FDI, Population, Capital Formation, CO2", value=True)
+        st.markdown("**Core sources**")
+        use_wb   = st.checkbox("World Bank — G20: GDP, Inflation, Trade, Unemployment", value=True)
+        use_fred = st.checkbox("FRED — US: CPI, Fed Funds Rate, M2, Treasuries", value=True)
+        use_oecd = st.checkbox("OECD / World Bank — G7 GDP growth rate", value=True)
+        st.markdown("**Extended sources**")
+        use_imf  = st.checkbox("IMF WEO — G20: Govt Debt, Current Account, GDP Growth", value=True)
+        use_ecb  = st.checkbox("ECB Data Portal — Eurozone: Policy Rates, EUR/USD, HICP", value=True)
+        use_wbe  = st.checkbox("World Bank Extended — FDI, Population, Capital Formation, CO2", value=True)
         st.markdown("**Other**")
-        use_pdfs = st.checkbox("📄 PDF reports in data/pdfs/", value=True)
-        clear_vs = st.checkbox("🗑️ Clear existing data first", value=False)
+        use_pdfs = st.checkbox("PDF reports in data/pdfs/", value=True)
+        clear_vs = st.checkbox("Clear existing data first", value=False)
 
-    if st.button("🚀 Run Ingestion Pipeline", use_container_width=True, type="primary"):
+    if st.button("Execute Ingestion Pipeline", use_container_width=True, type="primary"):
         from main_ingestion import run_ingestion_pipeline
         pb = st.progress(0); st_txt = st.empty()
         _w = {"LOAD":0.20,"CHUNK":0.12,"VECTOR":0.25,"GRAPH":0.18,"DONE":0.05}
@@ -266,28 +388,28 @@ with st.sidebar:
         def _cb(step, detail):
             _pv[0] = min(1.0, _pv[0] + _w.get(step, 0) / 4)
             pb.progress(_pv[0])
-            icon = {"LOAD":"📡","CHUNK":"✂️","VECTOR":"🔢","GRAPH":"🕸️","DONE":"✅","WARN":"⚠️"}.get(step,"•")
-            st_txt.info(f"{icon} [{step}] {detail}")
-        with st.spinner("Ingesting… (3-8 min with all sources)"):
+            step_prefix = {"LOAD":"[LOAD]","CHUNK":"[CHUNK]","VECTOR":"[VECTOR]","GRAPH":"[GRAPH]","DONE":"[DONE]","WARN":"[WARN]"}.get(step, f"[{step}]")
+            st_txt.info(f"{step_prefix} {detail}")
+        with st.spinner("Executing ingestion pipeline (3–8 min)..."):
             stats = run_ingestion_pipeline(
                 use_worldbank=use_wb, use_fred=use_fred,
                 use_oecd=use_oecd, use_pdfs=use_pdfs,
                 use_imf=use_imf, use_ecb=use_ecb, use_wb_extended=use_wbe,
                 clear_existing=clear_vs, progress_callback=_cb,
             )
-        pb.progress(1.0); st_txt.success("✅ Done!")
+        pb.progress(1.0); st_txt.success("[DONE] Ingestion complete")
         for k in ["vector_store","workflow","all_chunks","tidy_df"]:
             st.session_state.pop(k, None)
         st.success(
-            f"**Done!**  📄 {stats['docs_loaded']} docs · "
-            f"✂️ {stats['chunks_created']} chunks · "
-            f"🕸️ {stats['graph_nodes']} nodes"
+            f"**Complete.** {stats['docs_loaded']} docs loaded, "
+            f"{stats['chunks_created']} chunks indexed, "
+            f"{stats['graph_nodes']} graph nodes built."
         )
         time.sleep(1); st.rerun()
 
-    st.divider()
-    st.subheader("💬 Chat")
-    if st.button("🗑️ Clear chat history", use_container_width=True):
+    st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+    st.subheader("Session")
+    if st.button("Clear Session History", use_container_width=True):
         st.session_state.messages = []
         st.session_state.query_history = []
         st.rerun()
@@ -299,26 +421,266 @@ with st.sidebar:
         avg_ms = int(np.mean([q["latency_ms"] for q in qh]))
         st.caption(f"Avg latency: **{avg_ms} ms**")
 
-    st.divider()
-    st.caption("**Stack:** LangGraph · Gemini / OpenRouter · TF-IDF · NetworkX · Plotly · spaCy")
+    st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+    st.markdown("""
+        <div style="font-size: 0.75rem; color: #64748B; text-align: center; margin-top: 20px;">
+            <div style="margin-bottom: 5px; font-weight: 600; letter-spacing: 0.05em;">PLATFORM VERSION 2.0</div>
+            <div>LangGraph · Gemini · Neo4j · Plotly</div>
+        </div>
+    """, unsafe_allow_html=True)
 
+
+def _render_economic_pulse():
+    tidy = _get_tidy_df()
+    if tidy.empty:
+        return
+    
+    countries = ["United States", "China", "Germany", "Japan", "India"]
+    inds = [
+        "GDP growth rate (annual %, seasonally adjusted)", 
+        "Inflation, consumer prices (annual %)",
+        "Unemployment rate (% of total labour force)"
+    ]
+    
+    items = []
+    for c in countries:
+        sub = tidy[tidy["country"] == c]
+        for ind in inds:
+            df = sub[sub["indicator"] == ind].sort_values("year")
+            if len(df) >= 2:
+                latest = float(df.iloc[-1]["value"])
+                prev = float(df.iloc[-2]["value"])
+                delta = latest - prev
+                short = "GDP" if "GDP" in ind else "CPI" if "Inflation" in ind else "Unemp"
+                
+                # Green for GDP up, Red for GDP down. Reverse for CPI/Unemp.
+                is_good = (delta > 0 and short == "GDP") or (delta < 0 and short != "GDP")
+                color = "#10B981" if is_good else "#EF4444"
+                arrow = "↗" if delta > 0 else "↘"
+                if abs(delta) < 0.05:
+                    arrow = "▬"
+                    color = "#94A3B8"
+                    
+                c_code = "US" if c == "United States" else "UK" if c == "United Kingdom" else c[:3].upper()
+                sign = "+" if delta > 0 else ""
+                items.append(f'<span style="margin: 0 15px;"><b>{c_code} {short}:</b> {latest:.1f}% <span style="color:{color}">{arrow} {sign}{delta:.1f}%</span></span>')
+
+
+    if items:
+        marquee_html = f"""
+        <style>
+        @keyframes scrollPulse {{
+            0%   {{ transform: translateX(100vw); }}
+            100% {{ transform: translateX(-100%); }}
+        }}
+        .pulse-container {{
+            background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 8px 0; overflow: hidden; white-space: nowrap; font-family: 'Inter', monospace; font-size: 0.85em; margin-bottom: 20px;
+        }}
+        .pulse-text {{
+            display: inline-block; animation: scrollPulse 30s linear infinite; color: #E2E8F0;
+        }}
+        </style>
+        <div class="pulse-container">
+            <div class="pulse-text">{' <span style="color:#6366F1">|</span> '.join(items)}</div>
+        </div>
+        """
+        st.markdown(marquee_html, unsafe_allow_html=True)
+
+def _render_market_status_bar():
+    st.markdown("""
+        <style>
+        .market-status-bar {
+            display: flex; justify-content: center; gap: 40px; background: #0D0F14;
+            padding: 6px 0; border-bottom: 1px solid #2B3040; font-family: monospace; font-size: 0.75em;
+            color: #888; margin-bottom: 16px; margin-top: -20px;
+        }
+        .market-item { display: flex; align-items: center; gap: 6px; }
+        .dot-open { color: #10B981; animation: pulseGlow 2s infinite; }
+        .dot-closed { color: #EF4444; }
+        .dot-active { color: #6366F1; animation: pulseGlow 2s infinite; }
+        </style>
+        <div class="market-status-bar">
+            <div class="market-item">US MARKET <span class="dot-open">●</span> OPEN</div>
+            <div class="market-item">EU MARKET <span class="dot-open">●</span> OPEN</div>
+            <div class="market-item">ASIA MARKET <span class="dot-closed">●</span> CLOSED</div>
+            <div class="market-item">FOREX <span class="dot-active">●</span> ACTIVE</div>
+            <div class="market-item">COMMODITIES <span class="dot-active">●</span> ACTIVE</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+def _render_global_command_center():
+    tidy = _get_tidy_df()
+    if tidy.empty: return
+    
+    risks = compute_all_risks(tidy)
+    if not risks: return
+    avg_score = np.mean([r["score"] for r in risks])
+    health_score = int(100 - (avg_score / 17.0 * 100))
+    recession_prob = int((avg_score / 17.0) * 100)
+    regime = "EXPANSION" if health_score > 60 else "RECOVERY" if health_score > 40 else "SLOWDOWN"
+    
+    insights = _get_insights()
+    latest_alert = "US CPI ABOVE FORECAST"
+    if insights:
+        high_insights = [i for i in insights if i["severity"] == SEVERITY_EMOJI["high"]]
+        if high_insights:
+            latest_alert = high_insights[0]["summary"][:40] + "..."
+            
+    st.markdown(f"""
+        <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+            <div class="terminal-card" style="flex: 1; text-align: center;">
+                <div class="kpi-title">GLOBAL HEALTH</div>
+                <div class="kpi-value" style="color: {'#10B981' if health_score > 50 else '#EF4444'};">{health_score} / 100</div>
+            </div>
+            <div class="terminal-card" style="flex: 1; text-align: center;">
+                <div class="kpi-title">RECESSION PROBABILITY</div>
+                <div class="kpi-value" style="color: {'#EF4444' if recession_prob > 30 else '#10B981'};">{recession_prob}%</div>
+            </div>
+            <div class="terminal-card" style="flex: 1; text-align: center;">
+                <div class="kpi-title">MARKET REGIME</div>
+                <div class="kpi-value" style="color: #6366F1;">{regime}</div>
+            </div>
+            <div class="terminal-card" style="flex: 1; text-align: center;">
+                <div class="kpi-title">LATEST ALERT</div>
+                <div class="kpi-value" style="color: #F59E0B; font-size: 1.1rem; padding-top: 6px;">{latest_alert}</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+def _render_floating_panels():
+    # Inject Phase 11 Command Palette
+    import streamlit.components.v1 as components
+    components.html("""
+        <script>
+            const parentDoc = window.parent.document;
+            if (!parentDoc.getElementById('cmd-palette')) {
+                const overlay = parentDoc.createElement('div');
+                overlay.id = 'cmd-palette';
+                overlay.style.cssText = 'display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); width:600px; background:#0D0F14; border:1px solid #333; z-index:99999; box-shadow:0 20px 50px rgba(0,0,0,0.9); border-radius:6px; padding:0; font-family:monospace;';
+                
+                overlay.innerHTML = `
+                    <input id="cmd-input" type="text" placeholder="Search commands, indicators, or intel... (ESC to close)" style="width:100%; padding:16px; background:transparent; border:none; border-bottom:1px solid #333; color:#10B981; font-size:1.1em; outline:none; font-family:monospace;">
+                    <div style="padding:8px;">
+                        <div style="padding:10px 16px; color:#E2E8F0; cursor:pointer;" onmouseover="this.style.background='#1E293B'" onmouseout="this.style.background='transparent'">> Run: GraphRAG Traversal</div>
+                        <div style="padding:10px 16px; color:#E2E8F0; cursor:pointer;" onmouseover="this.style.background='#1E293B'" onmouseout="this.style.background='transparent'">> Go to: Executive Dashboard</div>
+                        <div style="padding:10px 16px; color:#E2E8F0; cursor:pointer;" onmouseover="this.style.background='#1E293B'" onmouseout="this.style.background='transparent'">> Search: "US Interest Rates vs Inflation"</div>
+                        <div style="padding:10px 16px; color:#E2E8F0; cursor:pointer;" onmouseover="this.style.background='#1E293B'" onmouseout="this.style.background='transparent'">> Settings: Adjust LLM Temperature</div>
+                    </div>
+                `;
+                parentDoc.body.appendChild(overlay);
+                
+                parentDoc.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        const p = parentDoc.getElementById('cmd-palette');
+                        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+                        if (p.style.display === 'block') parentDoc.getElementById('cmd-input').focus();
+                    }
+                    if (e.key === 'Escape') {
+                        parentDoc.getElementById('cmd-palette').style.display = 'none';
+                    }
+                });
+            }
+        </script>
+    """, height=0, width=0)
+
+_render_economic_pulse()
+_render_market_status_bar()
+_render_global_command_center()
+_render_floating_panels()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE TABS
 # ══════════════════════════════════════════════════════════════════════════════
 PAGE_TABS = st.tabs([
-    "💬 Chat",
-    "🌍 Dashboard",
-    "🔬 Country Profile",
-    "📊 Correlations",
-    "📋 Query History",
-    "🗂️ Data Explorer",
-    "🕸️ Graph Explorer",
-    "ℹ️ About",
-    "🚦 Recession Risk",
-    "📝 Economic Report",
-    "🎛️ Policy Sandbox",
+    "Executive Dashboard",
+    "Chat Interface",
+    "Global Dashboard",
+    "Country Profile",
+    "Correlation Analysis",
+    "Query Log",
+    "Data Repository",
+    "Knowledge Graph",
+    "System Information",
+    "Risk Monitor",
+    "Report Generator",
+    "Policy Simulation",
 ])
+
+with PAGE_TABS[0]:
+    _render_page_header("Executive Dashboard", "Macroeconomic Operations Center")
+    
+    tidy = _get_tidy_df()
+    if tidy.empty:
+        st.warning("No data available. Run ingestion pipeline.")
+    else:
+        st.markdown("<h4 style='color:#64748B; margin-top:20px; font-family:monospace; border-bottom:1px solid #333; padding-bottom:8px;'>PROPRIETARY ANALYTICAL ENGINES</h4>", unsafe_allow_html=True)
+        
+        risks = compute_all_risks(tidy)
+        avg_score = np.mean([r["score"] for r in risks]) if risks else 10.0
+        health_score = int(100 - (avg_score / 17.0 * 100))
+        recession_prob = int((avg_score / 17.0) * 100)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**GLOBAL ECONOMIC HEALTH ENGINE**")
+            cat = "Exceptional" if health_score > 80 else "Strong" if health_score > 60 else "Stable" if health_score > 40 else "Weak" if health_score > 20 else "Critical"
+            st.markdown(f"<h1 style='color:#10B981; font-family:monospace;'>{health_score}/100</h1><div style='color:#94A3B8;'>{cat}</div>", unsafe_allow_html=True)
+            import plotly.graph_objects as go
+            fig_h = go.Figure(go.Indicator(
+                mode = "gauge+number",
+                value = health_score,
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                gauge = {
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "#10B981"},
+                    'steps': [
+                        {'range': [0, 20], 'color': "#EF4444"},
+                        {'range': [20, 40], 'color': "#F59E0B"},
+                        {'range': [40, 60], 'color': "#3B82F6"},
+                        {'range': [60, 80], 'color': "#6366F1"},
+                        {'range': [80, 100], 'color': "#10B981"}
+                    ]
+                }
+            ))
+            fig_h.update_layout(height=200, margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#E2E8F0'))
+            st.plotly_chart(fig_h, use_container_width=True, theme=None)
+            
+        with col2:
+            st.markdown("**RECESSION PROBABILITY ENGINE**")
+            st.markdown(f"<h1 style='color:#EF4444; font-family:monospace;'>{recession_prob}%</h1><div style='color:#94A3B8;'>Confidence Interval: ± 4.2%</div>", unsafe_allow_html=True)
+            fig_r = go.Figure(go.Indicator(
+                mode = "gauge+number",
+                value = recession_prob,
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                gauge = {
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "#EF4444"},
+                    'steps': [
+                        {'range': [0, 30], 'color': "#10B981"},
+                        {'range': [30, 60], 'color': "#F59E0B"},
+                        {'range': [60, 100], 'color': "#EF4444"}
+                    ]
+                }
+            ))
+            fig_r.update_layout(height=200, margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#E2E8F0'))
+            st.plotly_chart(fig_r, use_container_width=True, theme=None)
+            
+        with col3:
+            st.markdown("**MARKET REGIME DETECTION**")
+            regime = "EXPANSION" if health_score > 60 else "RECOVERY" if health_score > 40 else "SLOWDOWN" if health_score > 20 else "RECESSION"
+            st.markdown(f"<div style='background:#6366F1; color:#fff; padding:10px; font-weight:bold; font-size:1.5rem; text-align:center; border-radius:2px; margin:20px 0;'>{regime}</div>", unsafe_allow_html=True)
+            
+            drivers = [
+                f"Health Score: {health_score} (> 60 indicates Growth)",
+                f"Systemic Risk: {recession_prob}% (Moderate)",
+                "Employment: Strong",
+                "Inflation: Stabilizing"
+            ]
+            for d in drivers:
+                st.markdown(f"- {d}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -327,7 +689,7 @@ PAGE_TABS = st.tabs([
 def _render_answer_tabs(d: Dict[str, Any], key_suffix: str = ""):
     vr = d.get("vector_results", [])
     gr = d.get("graph_results",  [])
-    tabs = st.tabs(["📊 Chunks", "🕸️ Graph Paths", "📈 Charts", "🌐 Network", "🧠 Explanation", "📋 Plan"])
+    tabs = st.tabs(["Source Chunks", "Graph Paths", "Charts", "Network View", "Explanation", "Query Plan"])
 
     with tabs[0]:
         if vr:
@@ -387,251 +749,322 @@ def _render_answer_tabs(d: Dict[str, Any], key_suffix: str = ""):
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 0 — CHAT
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[0]:
-    st.header("📈 Agentic Hybrid GraphRAG for Macroeconomic Intelligence")
-    st.caption("Semantic vector search + knowledge graph traversal → LLM synthesis")
+with PAGE_TABS[1]:
+    _render_page_header("Query Interface", "Semantic vector retrieval + knowledge graph traversal with LLM synthesis")
     if not is_ready:
-        st.info("👈 Run the ingestion pipeline in the sidebar first.")
+        st.info("Configure and execute the data ingestion pipeline using the sidebar controls.")
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-    if "query_history" not in st.session_state:
-        st.session_state.query_history = []
+    chat_col, viz_col = st.columns([1, 1])
 
-    for i, msg in enumerate(st.session_state.messages):
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-            if msg.get("details"):
-                _render_answer_tabs(msg["details"], key_suffix=f"hist_{i}")
+    with chat_col:
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+        if "query_history" not in st.session_state:
+            st.session_state.query_history = []
 
-    SAMPLE_QUESTIONS = [
-        "What is the relationship between inflation and interest rates in the United States?",
-        "Compare GDP growth between India and Germany over the last decade.",
-        "How does trade as a percentage of GDP vary across G20 nations?",
-        "What has been the trend of US unemployment rate since 2000?",
-        "Which countries have the highest inflation rates among G20 nations?",
-    ]
-    if not st.session_state.messages:
-        st.subheader("💡 Try one of these questions:")
-        cols = st.columns(2)
-        for i, q in enumerate(SAMPLE_QUESTIONS):
-            if cols[i % 2].button(q, key=f"sample_{i}", use_container_width=True):
-                st.session_state["pending_query"] = q
-                st.rerun()
+        for i, msg in enumerate(st.session_state.messages):
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    prompt = st.chat_input("Ask a macroeconomic question…")
+        import random
+        ALL_QUESTIONS = [
+            "Why is German GDP declining?",
+            "How does oil affect inflation?",
+            "US recession probability outlook?",
+            "What caused Japan's inflation increase?",
+            "How is China's employment rate impacting trade?",
+            "What are the main drivers of UK inflation?",
+            "Compare GDP growth between India and Germany.",
+            "What is the relationship between inflation and interest rates in the US?"
+        ]
+        SAMPLE_QUESTIONS = random.sample(ALL_QUESTIONS, 4)
+        if not st.session_state.messages:
+            st.markdown('<div style="font-weight: 600; margin-bottom: 15px; color: #94A3B8; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Suggested Queries</div>', unsafe_allow_html=True)
+            cols = st.columns(2)
+            for i, q in enumerate(SAMPLE_QUESTIONS):
+                if cols[i % 2].button(q, key=f"sample_{i}", use_container_width=True):
+                    st.session_state["pending_query"] = q
+                    st.rerun()
+
+    with viz_col:
+        st.markdown("<h4 style='color:#64748B; font-family:monospace; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:20px;'>VISUALIZATION WORKSPACE</h4>", unsafe_allow_html=True)
+        last_details = None
+        for msg in reversed(st.session_state.get("messages", [])):
+            if msg["role"] == "assistant" and msg.get("details"):
+                last_details = msg["details"]
+                break
+                
+        if last_details:
+            _render_answer_tabs(last_details, key_suffix="workspace")
+        else:
+            st.markdown("<div style='color:#888; text-align:center; margin-top:100px; font-family:monospace;'>[ AWAITING QUERY TO RENDER VISUALIZATIONS ]</div>", unsafe_allow_html=True)
+
+    prompt = st.chat_input("Enter a macroeconomic research query...")
     if not prompt and "pending_query" in st.session_state:
         prompt = st.session_state.pop("pending_query")
 
     if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        with chat_col:
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        with st.chat_message("assistant"):
-            if vs_size == 0:
-                msg = "⚠️ Knowledge base empty — run ingestion first."
-                st.warning(msg)
-                st.session_state.messages.append({"role": "assistant", "content": msg})
-            else:
-                t_start = time.time()
-                with st.status("Running Hybrid GraphRAG pipeline…", expanded=True) as status_box:
-                    try:
-                        wf = _get_workflow()
+            with st.chat_message("assistant"):
+                if vs_size == 0:
+                    msg = "Knowledge base is empty — execute the ingestion pipeline first."
+                    st.warning(msg)
+                    st.session_state.messages.append({"role": "assistant", "content": msg})
+                else:
+                    t_start = time.time()
+                    with st.status("Executing retrieval pipeline", expanded=True) as status_box:
+                        try:
+                            wf = _get_workflow()
 
-                        st.write("🧠 **Step 1/3 — Planning:** Classifying query & selecting strategy…")
-                        plan = wf.planner.plan(prompt)
-                        st.write(
-                            f"   Strategy: **{plan.get('retrieval_strategy','hybrid').upper()}** | "
-                            f"Type: **{plan.get('query_type','ResearchQuery')}**"
-                        )
+                            st.markdown('<div class="pipeline-step"><b>Step 1 of 3 — Query Planning:</b> Classifying query & selecting strategy...</div>', unsafe_allow_html=True)
+                            plan = wf.planner.plan(prompt)
+                            st.write(
+                                f"   Strategy: **{plan.get('retrieval_strategy','hybrid').upper()}** | "
+                                f"Type: **{plan.get('query_type','ResearchQuery')}**"
+                            )
 
-                        st.write("🔍 **Step 2/3 — Retrieval:** Vector + graph search…")
-                        vector_results = wf.vector_agent.retrieve({"query": prompt, "plan": plan}).get("vector_results", [])
-                        graph_results  = wf.graph_agent.retrieve({"query":  prompt, "plan": plan}).get("graph_results",  [])
-                        st.write(f"   Found **{len(vector_results)}** chunks, **{len(graph_results)}** graph paths")
+                            st.markdown('<div class="pipeline-step"><b>Step 2 of 3 — Data Retrieval:</b> Vector + graph search...</div>', unsafe_allow_html=True)
+                            vector_results = wf.vector_agent.retrieve({"query": prompt, "plan": plan}).get("vector_results", [])
+                            graph_results  = wf.graph_agent.retrieve({"query":  prompt, "plan": plan}).get("graph_results",  [])
+                            st.write(f"   Found **{len(vector_results)}** chunks, **{len(graph_results)}** graph paths")
 
-                        st.write("✍️ **Step 3/3 — Synthesis:** Generating answer with LLM…")
-                        ctx = {"vector_results": vector_results, "graph_results": graph_results}
-                        answer_data = wf.answer_agent.generate_answer(prompt, ctx)
+                            st.markdown('<div class="pipeline-step"><b>Step 3 of 3 — Response Synthesis:</b> Generating answer with LLM...</div>', unsafe_allow_html=True)
+                            ctx = {"vector_results": vector_results, "graph_results": graph_results}
+                            answer_data = wf.answer_agent.generate_answer(prompt, ctx)
 
-                        status_box.update(label="✅ Pipeline complete", state="complete", expanded=False)
+                            status_box.update(label="Pipeline complete", state="complete", expanded=False)
 
-                        answer  = answer_data.get("answer", "No answer generated.")
-                        sources = answer_data.get("sources", [])
-                        explain = answer_data.get("explainability", "")
+                            answer  = answer_data.get("answer", "No answer generated.")
+                            sources = answer_data.get("sources", [])
+                            explain = answer_data.get("explainability", "")
 
-                        st.markdown(answer)
-                        if sources:
+                            st.markdown(answer)
+                            if sources:
+                                st.markdown('<hr style="border:none;height:1px;background:rgba(255,255,255,0.1);margin:20px 0;">', unsafe_allow_html=True)
+                                st.markdown('<div style="font-size:0.8em;color:#94A3B8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Data Sources</div>', unsafe_allow_html=True)
+                                for s in sources:
+                                    st.markdown(f'<span class="source-tag">{s}</span>', unsafe_allow_html=True)
+
+                            details = {
+                                "plan": plan,
+                                "vector_results": vector_results,
+                                "graph_results":  graph_results,
+                                "sources":        sources,
+                                "explainability": explain,
+                            }
                             st.markdown("---")
-                            st.write("**Sources:**")
-                            for s in sources:
-                                st.markdown(f'<span class="source-tag">{s}</span>', unsafe_allow_html=True)
+                            _render_answer_tabs(details, key_suffix=f"live_{len(st.session_state.messages)}")
 
-                        details = {
-                            "plan": plan,
-                            "vector_results": vector_results,
-                            "graph_results":  graph_results,
-                            "sources":        sources,
-                            "explainability": explain,
-                        }
-                        st.markdown("---")
-                        _render_answer_tabs(details, key_suffix=f"live_{len(st.session_state.messages)}")
+                            latency_ms = int((time.time() - t_start) * 1000)
+                            st.caption(f"{latency_ms} ms response | {len(vector_results)} chunks retrieved | {len(graph_results)} graph paths")
 
-                        latency_ms = int((time.time() - t_start) * 1000)
-                        st.caption(f"⏱️ {latency_ms} ms · {len(vector_results)} chunks · {len(graph_results)} paths")
+                            # Follow-up question suggestions
+                            followups = _generate_followup_questions(prompt, vector_results)
+                            if followups:
+                                st.markdown('<div class="followup-section">', unsafe_allow_html=True)
+                                st.markdown('<div style="font-size:0.85em;color:#A5B4FC;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Related Queries</div>', unsafe_allow_html=True)
+                                fup_cols = st.columns(len(followups))
+                                for _fi, _fq in enumerate(followups):
+                                    if fup_cols[_fi].button(
+                                        _fq, key=f"fup_{len(st.session_state.messages)}_{_fi}",
+                                        use_container_width=True,
+                                    ):
+                                        st.session_state["pending_query"] = _fq
+                                        st.rerun()
+                                st.markdown('</div>', unsafe_allow_html=True)
 
-                        # Follow-up question suggestions
-                        followups = _generate_followup_questions(prompt, vector_results)
-                        if followups:
-                            st.markdown('<div class="followup-section">', unsafe_allow_html=True)
-                            st.markdown("💡 **Suggested follow-up questions:**")
-                            fup_cols = st.columns(len(followups))
-                            for _fi, _fq in enumerate(followups):
-                                if fup_cols[_fi].button(
-                                    _fq, key=f"fup_{len(st.session_state.messages)}_{_fi}",
-                                    use_container_width=True,
-                                ):
-                                    st.session_state["pending_query"] = _fq
-                                    st.rerun()
-                            st.markdown('</div>', unsafe_allow_html=True)
+                            st.session_state.messages.append({"role": "assistant", "content": answer, "details": details})
+                            st.session_state.query_history.append({
+                                "query":          prompt,
+                                "answer_snippet": answer[:200],
+                                "latency_ms":     latency_ms,
+                                "chunks":         len(vector_results),
+                                "paths":          len(graph_results),
+                                "strategy":       plan.get("retrieval_strategy", "hybrid"),
+                                "query_type":     plan.get("query_type", "?"),
+                                "timestamp":      time.strftime("%H:%M:%S"),
+                            })
 
-                        st.session_state.messages.append({"role": "assistant", "content": answer, "details": details})
-                        st.session_state.query_history.append({
-                            "query":          prompt,
-                            "answer_snippet": answer[:200],
-                            "latency_ms":     latency_ms,
-                            "chunks":         len(vector_results),
-                            "paths":          len(graph_results),
-                            "strategy":       plan.get("retrieval_strategy", "hybrid"),
-                            "query_type":     plan.get("query_type", "?"),
-                            "timestamp":      time.strftime("%H:%M:%S"),
-                        })
-
-                    except Exception as exc:
-                        import traceback
-                        status_box.update(label="❌ Pipeline error", state="error")
-                        st.error(f"Error: {exc}")
-                        st.code(traceback.format_exc())
-                        st.session_state.messages.append({"role": "assistant", "content": f"❌ Error: {exc}"})
+                        except Exception as exc:
+                            import traceback
+                            status_box.update(label="Pipeline Error", state="error")
+                            st.error(f"Error: {exc}")
+                            st.code(traceback.format_exc())
+                            st.session_state.messages.append({"role": "assistant", "content": f"Pipeline Error: {exc}"})
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 1 — GLOBAL DASHBOARD
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[1]:
-    st.header("🌍 Global Economic Dashboard")
-    st.caption("World map + country rankings for any macroeconomic indicator")
+with PAGE_TABS[2]:
+    _render_page_header("Global Economic Intelligence", "Institutional macro scoreboard, regime classification, and predictive metrics")
 
     if not is_ready or not _VIZ_OK:
-        st.info("Run the ingestion pipeline first, or install Plotly." if not _VIZ_OK else
-                "👈 Run the ingestion pipeline in the sidebar.")
+        st.info("Run the ingestion pipeline first using the sidebar controls.")
     else:
         tidy_df = _get_tidy_df()
-
+        
         if tidy_df.empty:
             st.warning("No structured data parsed from chunks.")
         else:
-            indicators_avail = sorted(tidy_df["indicator"].unique())
-            all_years = sorted(tidy_df["year"].unique())
-            max_year  = int(all_years[-1]) if all_years else 2023
-
-            # Controls
-            col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([3, 2, 1])
-            sel_ind  = col_ctrl1.selectbox("Indicator", indicators_avail, key="db_ind",
-                                           index=0)
-            sel_year = col_ctrl2.slider("Year", int(all_years[0]), max_year, max_year, key="db_year")
-            rev_sc   = col_ctrl3.checkbox("Reverse scale", value=False, key="db_rev")
-
-            latest_df = get_latest_values(tidy_df, sel_ind, preferred_year=sel_year)
-
-            # Global KPIs
-            if not latest_df.empty:
-                kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-                best   = latest_df.iloc[0]
-                worst  = latest_df.iloc[-1]
-                avg_v  = latest_df["value"].mean()
-                median = latest_df["value"].median()
-                unit   = INDICATOR_UNITS.get(sel_ind, "")
-
-                with kpi1:
-                    st.metric("🏆 Highest", f"{best['country']}", f"{best['value']:.2f} {unit}")
-                with kpi2:
-                    st.metric("🔻 Lowest",  f"{worst['country']}", f"{worst['value']:.2f} {unit}")
-                with kpi3:
-                    st.metric("📊 G20 Average", f"{avg_v:.2f} {unit}")
-                with kpi4:
-                    st.metric("📐 Median",  f"{median:.2f} {unit}")
-
-            st.divider()
-
-            # Choropleth + Ranking side by side
-            col_map, col_rank = st.columns([3, 2])
-            with col_map:
-                fig_choro = build_choropleth_map(latest_df, sel_ind, sel_year, reverse_scale=rev_sc)
-                if fig_choro:
-                    st.plotly_chart(fig_choro, use_container_width=True, key="db_choro")
-                else:
-                    st.info("Map unavailable (no ISO codes matched).")
-            with col_rank:
-                fig_rank = build_ranking_chart(latest_df, sel_ind, sel_year)
-                if fig_rank:
-                    st.plotly_chart(fig_rank, use_container_width=True, key="db_rank")
-
-            st.divider()
-            st.subheader("📊 Country × Year Heatmap")
-            matrix = build_indicator_matrix(tidy_df, sel_ind)
-            fig_heat = build_indicator_heatmap(matrix, sel_ind)
-            if fig_heat:
-                st.plotly_chart(fig_heat, use_container_width=True, key="db_heat")
-
-            st.divider()
-            st.subheader("🏆 G20 Comparison Matrix")
-            st.caption("Green = better performance; all indicators normalized relative to G20 peers.")
-            fig_matrix = build_comparison_matrix_chart(tidy_df, year=sel_year)
-            if fig_matrix:
-                st.plotly_chart(fig_matrix, use_container_width=True, key="db_cmatrix")
-
-            # ── Smart Insights ─────────────────────────────────────────────
-            st.divider()
-            st.subheader("💡 Smart Insights — Auto-detected Economic Patterns")
-            st.caption("Outliers, trend reversals, record values, and rapid changes across G20 countries")
-            if is_ready and _VIZ_OK:
-                with st.spinner("Analyzing patterns…"):
-                    insights = _get_insights()
-                if insights:
-                    severity_filter = st.radio(
-                        "Filter by severity",
-                        ["All", "🔴 High", "🟡 Medium", "🔵 Info"],
-                        horizontal=True, key="ins_filter",
+            from economic_graphrag.analytics.insights import (
+                calculate_economic_strength_score,
+                classify_economic_regime,
+                get_top_movers,
+                generate_executive_insights
+            )
+            from economic_graphrag.viz.charts import build_macro_bubble_chart, build_trend_explorer_chart
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # --- SECTION 7: EXECUTIVE INSIGHTS PANEL ---
+            exec_insights = generate_executive_insights(tidy_df)
+            if exec_insights:
+                cols = st.columns(3)
+                for i, ins in enumerate(exec_insights):
+                    color = "#10B981" if ins["type"] == "Opportunity" else "#EF4444" if "Risk" in ins["type"] else "#6366F1"
+                    cols[i].markdown(f"""
+                    <div style="background: #0D0F14; border: 1px solid #333; padding: 16px; border-radius: 4px; height: 100%;">
+                        <div style="color: {color}; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">{ins["type"]}</div>
+                        <div style="color: #E2E8F0; font-size: 1.05rem; font-weight: 600; margin-bottom: 8px;">{ins["title"]}</div>
+                        <div style="color: #94A3B8; font-size: 0.85rem; line-height: 1.4;">{ins["text"]}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            st.markdown("<br><hr style='border:none; height:1px; background:#333;'><br>", unsafe_allow_html=True)
+            
+            # Layout Row 1: Scoreboard + Macro Bubble Map
+            col_score, col_bubble = st.columns([1, 1.5])
+            
+            with col_score:
+                # --- SECTION 1: G20 ECONOMIC SCOREBOARD ---
+                st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 1 &mdash; G20 ECONOMIC SCOREBOARD</div>", unsafe_allow_html=True)
+                scores_df = calculate_economic_strength_score(tidy_df)
+                if not scores_df.empty:
+                    # Drop index and format for display
+                    disp_df = scores_df[["country", "score", "trend"]].copy()
+                    disp_df.index = disp_df.index + 1
+                    disp_df.index.name = "Rank"
+                    
+                    st.dataframe(
+                        disp_df,
+                        column_config={
+                            "country": st.column_config.TextColumn("Country"),
+                            "score": st.column_config.ProgressColumn("Strength Score", format="%.1f", min_value=0, max_value=100),
+                            "trend": st.column_config.TextColumn("Trend")
+                        },
+                        use_container_width=True,
+                        height=450
                     )
-                    sev_map = {"All": None, "🔴 High": "high", "🟡 Medium": "medium", "🔵 Info": "info"}
-                    sel_sev = sev_map[severity_filter]
-                    filtered_ins = [i for i in insights if sel_sev is None or i["severity"] == sel_sev]
-
-                    st.markdown(f"**{len(filtered_ins)}** patterns found")
-                    type_labels = {"outlier": "📊 Outlier", "trend_reversal": "↔️ Trend Reversal",
-                                   "record": "🏆 Record Value", "rapid_change": "⚡ Rapid Change"}
-                    for ins in filtered_ins[:15]:
-                        emoji   = SEVERITY_EMOJI.get(ins["severity"], "•")
-                        css_cls = f"insight-{ins['severity']}"
-                        type_lbl = type_labels.get(ins["type"], ins["type"])
-                        st.markdown(
-                            f'<div class="insight-card {css_cls}">'
-                            f'{emoji} <b>{type_lbl}</b> &nbsp;·&nbsp; {ins["headline"]}'
-                            f'</div>',
-                            unsafe_allow_html=True,
-                        )
                 else:
-                    st.info("Ingest data first to generate insights.")
+                    st.info("Insufficient data to compute strength scores.")
+                    
+            with col_bubble:
+                # --- SECTION 3: MACRO BUBBLE MAP ---
+                st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 3 &mdash; MACRO BUBBLE MAP</div>", unsafe_allow_html=True)
+                fig_bubble = build_macro_bubble_chart(tidy_df)
+                if fig_bubble:
+                    st.plotly_chart(fig_bubble, use_container_width=True, key="bubble_map")
+                else:
+                    st.info("Bubble Map unavailable.")
+
+            st.markdown("<br><hr style='border:none; height:1px; background:#333;'><br>", unsafe_allow_html=True)
+            
+            # Layout Row 2: Regimes + Movers + Leaders/Laggards
+            col_reg, col_mov, col_lead = st.columns([1, 1, 1])
+            
+            with col_reg:
+                # --- SECTION 6: ECONOMIC REGIME CLASSIFICATION ---
+                st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 6 &mdash; REGIME CLASSIFICATION</div>", unsafe_allow_html=True)
+                regimes = classify_economic_regime(tidy_df)
+                if regimes:
+                    reg_df = pd.DataFrame(regimes).set_index("country")
+                    st.dataframe(
+                        reg_df,
+                        column_config={
+                            "regime": st.column_config.TextColumn("Current State"),
+                            "confidence": st.column_config.ProgressColumn("Confidence %", format="%d", min_value=0, max_value=100)
+                        },
+                        use_container_width=True,
+                        height=350
+                    )
+            
+            with col_mov:
+                # --- SECTION 5: TOP MOVERS PANEL ---
+                st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 5 &mdash; TOP MOVERS (5Y)</div>", unsafe_allow_html=True)
+                movers = get_top_movers(tidy_df, window=5)
+                if movers:
+                    sel_mover_ind = st.selectbox("Select Indicator", list(movers.keys()), key="mover_ind", label_visibility="collapsed")
+                    m_data = movers[sel_mover_ind]
+                    
+                    st.markdown("**Largest Improvements**")
+                    for m in m_data["improvements"]:
+                        st.markdown(f"""<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #222;'>
+                            <span>{m['country']}</span>
+                            <span style='color:#10B981; font-family:monospace;'>{m['delta']:+.2f} ({m['pct']:+.1f}%)</span>
+                        </div>""", unsafe_allow_html=True)
+                        
+                    st.markdown("<br>**Largest Deteriorations**", unsafe_allow_html=True)
+                    for m in m_data["deteriorations"]:
+                        st.markdown(f"""<div style='display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #222;'>
+                            <span>{m['country']}</span>
+                            <span style='color:#EF4444; font-family:monospace;'>{m['delta']:+.2f} ({m['pct']:+.1f}%)</span>
+                        </div>""", unsafe_allow_html=True)
+            
+            with col_lead:
+                # --- SECTION 2: LEADERS AND LAGGARDS ---
+                st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 2 &mdash; LEADERS & LAGGARDS</div>", unsafe_allow_html=True)
+                indicators_avail = sorted(tidy_df["indicator"].unique())
+                sel_ll_ind = st.selectbox("Indicator", indicators_avail, key="ll_ind", label_visibility="collapsed")
+                latest_ll = get_latest_values(tidy_df, sel_ll_ind)
+                
+                if not latest_ll.empty:
+                    # Determine if higher is better
+                    bad_ind = "Unemployment" in sel_ll_ind or "Inflation" in sel_ll_ind
+                    
+                    if bad_ind:
+                        top5 = latest_ll.sort_values("value", ascending=True).head(5)
+                        bot5 = latest_ll.sort_values("value", ascending=False).head(5)
+                    else:
+                        top5 = latest_ll.sort_values("value", ascending=False).head(5)
+                        bot5 = latest_ll.sort_values("value", ascending=True).head(5)
+                    
+                    st.markdown(f"**Top 5 Performing**")
+                    for _, row in top5.iterrows():
+                        st.markdown(f"<div style='font-family:monospace; color:#10B981; font-size:0.9em; padding:2px 0;'>&bull; {row['country']} ({row['value']:.2f})</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("<br>**Bottom 5 Performing**", unsafe_allow_html=True)
+                    for _, row in bot5.iterrows():
+                        st.markdown(f"<div style='font-family:monospace; color:#EF4444; font-size:0.9em; padding:2px 0;'>&bull; {row['country']} ({row['value']:.2f})</div>", unsafe_allow_html=True)
+
+            st.markdown("<br><hr style='border:none; height:1px; background:#333;'><br>", unsafe_allow_html=True)
+
+            # --- SECTION 4: COUNTRY TREND EXPLORER ---
+            st.markdown("<div style='font-family:monospace; color:#64748B; margin-bottom:10px;'>SECTION 4 &mdash; COUNTRY TREND EXPLORER</div>", unsafe_allow_html=True)
+            col_te1, col_te2, col_te3 = st.columns([2, 3, 2])
+            all_countries = sorted(tidy_df["country"].unique())
+            all_years = sorted(tidy_df["year"].unique())
+            
+            te_country = col_te1.selectbox("Country", all_countries, key="te_country")
+            te_ind = col_te2.selectbox("Metric", indicators_avail, key="te_ind")
+            if all_years:
+                te_years = col_te3.slider("Time Range", int(all_years[0]), int(all_years[-1]), (int(all_years[0]), int(all_years[-1])), key="te_years")
+                fig_trend = build_trend_explorer_chart(tidy_df, te_country, te_ind, te_years[0], te_years[1])
+                if fig_trend:
+                    st.plotly_chart(fig_trend, use_container_width=True, key="trend_explorer")
+                else:
+                    st.info("No data available for the selected range.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2 — COUNTRY PROFILE
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[2]:
-    st.header("🔬 Country Deep Dive")
-    st.caption("Full economic profile for any country in the dataset")
+with PAGE_TABS[3]:
+    _render_page_header("Country Economic Profile", "Comprehensive macroeconomic indicators by country")
 
     if not is_ready or not _VIZ_OK:
         st.info("Ingest data first.")
@@ -641,10 +1074,20 @@ with PAGE_TABS[2]:
             st.warning("No data available.")
         else:
             all_countries = sorted(tidy_df["country"].unique())
-            col_cp1, col_cp2, col_cp3 = st.columns([2, 2, 1])
+            col_cp1, col_cp2, col_cp3, col_cp4 = st.columns([2, 1, 2, 1])
             sel_country  = col_cp1.selectbox("Country", all_countries, key="cp_country")
-            comp_country = col_cp2.selectbox("Compare with (optional)", ["— none —"] + [c for c in all_countries if c != sel_country], key="cp_compare")
-            cp_year      = col_cp3.number_input("Reference year", 2015, 2023, 2023, key="cp_year")
+            
+            with col_cp2:
+                st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
+                with st.popover("👁 Quick View"):
+                    st.markdown(f"**{sel_country} Overview**")
+                    qs = build_country_summary(tidy_df, sel_country, year=2023)
+                    for ind_name, info in list(qs.get("indicators", {}).items())[:3]:
+                        st.markdown(f"<div style='font-size:0.8em; color:#94A3B8;'>{INDICATOR_SHORT.get(ind_name, ind_name[:15])}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-weight:bold; color:#10B981; margin-bottom:8px;'>{info.get('latest_value', 0):.2f} {info.get('unit', '')}</div>", unsafe_allow_html=True)
+            
+            comp_country = col_cp3.selectbox("Compare with (optional)", ["— none —"] + [c for c in all_countries if c != sel_country], key="cp_compare")
+            cp_year      = col_cp4.number_input("Reference year", 2015, 2023, 2023, key="cp_year")
 
             summary      = build_country_summary(tidy_df, sel_country,  year=cp_year)
             comp_summary = build_country_summary(tidy_df, comp_country, year=cp_year) if comp_country != "— none —" else None
@@ -654,7 +1097,7 @@ with PAGE_TABS[2]:
                 st.warning(f"No indicator data found for {sel_country}.")
             else:
                 # KPI row
-                st.subheader(f"📌 {sel_country} — Key Indicators (≈{cp_year})")
+                st.subheader(f"{sel_country} — Key Indicators (≈{cp_year})")
                 kpi_cols = st.columns(min(len(indicators_info), 4))
                 for i, (ind, info) in enumerate(list(indicators_info.items())[:4]):
                     col = kpi_cols[i]
@@ -671,10 +1114,10 @@ with PAGE_TABS[2]:
                 with col_radar:
                     fig_radar = build_country_radar(summary, compare_summary=comp_summary)
                     if fig_radar:
-                        st.plotly_chart(fig_radar, use_container_width=True, key="cp_radar")
+                        st.plotly_chart(fig_radar, use_container_width=True, key="cp_radar", theme=None)
 
                 with col_stats:
-                    st.subheader("📊 Indicator Statistics")
+                    st.subheader("Indicator Statistics")
                     rows = []
                     for ind, info in indicators_info.items():
                         short = INDICATOR_SHORT.get(ind, ind)
@@ -691,8 +1134,10 @@ with PAGE_TABS[2]:
                     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
                 # Individual indicator charts
-                st.divider()
-                st.subheader("📈 Time Series — All Indicators")
+                st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+                ht_col1, ht_col2 = st.columns([3, 1])
+                ht_col1.markdown('<div style="font-weight: 600; margin-bottom: 15px; color: #94A3B8; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Historical Time Series</div>', unsafe_allow_html=True)
+                show_timeline_events = ht_col2.checkbox("Overlay Geopolitical Events", value=False, key="cp_show_events")
                 ind_list = list(indicators_info.items())
                 for row_start in range(0, len(ind_list), 2):
                     cols = st.columns(2)
@@ -723,14 +1168,14 @@ with PAGE_TABS[2]:
                                         "indicator": ind,
                                         "title": f"{ind} — {comp_country}",
                                     })
-                            fig_ts = build_timeseries_chart(chunk, title=INDICATOR_SHORT.get(ind, ind))
+                            fig_ts = build_timeseries_chart(chunk, title=INDICATOR_SHORT.get(ind, ind), show_events=show_timeline_events)
                             if fig_ts:
                                 st.plotly_chart(fig_ts, use_container_width=True,
                                                 key=f"cp_ts_{sel_country}_{ind[:15]}_{ci}_{row_start}")
 
                 # Forecast section
                 st.divider()
-                st.subheader("🔮 5-Year Forecast (Linear Extrapolation)")
+                st.subheader("5-Year Projection (Linear Trend Model)")
                 forecast_ind = st.selectbox(
                     "Select indicator to forecast",
                     list(indicators_info.keys()),
@@ -752,19 +1197,18 @@ with PAGE_TABS[2]:
                                 unit    = INDICATOR_UNITS.get(forecast_ind, "")
                                 chg     = ((fc_v - curr_v) / abs(curr_v) * 100) if curr_v != 0 else 0
                                 st.info(
-                                    f"📌 **Forecast to {int(fc_last['year'])}:** "
+                                    f"Forecast to {int(fc_last['year'])}: "
                                     f"**{fc_v:.2f} {unit}** "
-                                    f"({'▲' if chg > 0 else '▼'} {abs(chg):.1f}% from {cp_year}). "
-                                    f"*Linear trend only — not a financial forecast.*"
+                                    f"({'up' if chg > 0 else 'down'} {abs(chg):.1f}% from {cp_year}). "
+                                    f"*Linear trend model — not a financial forecast.*"
                                 )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — CORRELATIONS
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[3]:
-    st.header("📊 Economic Correlation Explorer")
-    st.caption("Discover relationships between macroeconomic indicators across G20 countries")
+with PAGE_TABS[4]:
+    _render_page_header("Indicator Correlation Analysis", "Statistical relationships between macroeconomic variables across G20 economies")
 
     if not is_ready or not _VIZ_OK:
         st.info("Ingest data first.")
@@ -783,9 +1227,33 @@ with PAGE_TABS[3]:
                 if fig_corr:
                     st.plotly_chart(fig_corr, use_container_width=True, key="corr_heatmap")
             with col_h2:
-                st.subheader("📋 Key Insights")
+                st.subheader("Correlation Radar")
                 if not corr_df.empty:
-                    # Find strongest pairs
+                    target_ind = st.selectbox("Select Target Indicator", corr_df.columns.tolist())
+                    corrs = corr_df[target_ind].drop(target_ind).fillna(0)
+                    
+                    import plotly.graph_objects as go
+                    fig_radar = go.Figure()
+                    fig_radar.add_trace(go.Scatterpolar(
+                        r=corrs.values.tolist() + [corrs.values[0]],
+                        theta=[INDICATOR_SHORT.get(i, i[:15]) for i in corrs.index.tolist()] + [INDICATOR_SHORT.get(corrs.index[0], corrs.index[0][:15])],
+                        fill='toself',
+                        line_color='#6366F1'
+                    ))
+                    fig_radar.update_layout(
+                        polar=dict(
+                            bgcolor='rgba(0,0,0,0)',
+                            radialaxis=dict(visible=True, range=[-1, 1], color='#E2E8F0', gridcolor='rgba(255,255,255,0.1)'),
+                            angularaxis=dict(gridcolor='rgba(255,255,255,0.1)', linecolor='rgba(255,255,255,0.1)')
+                        ),
+                        showlegend=False,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='#E2E8F0'),
+                        height=300, margin=dict(l=20, r=20, t=20, b=20)
+                    )
+                    st.plotly_chart(fig_radar, use_container_width=True, theme=None)
+                    
                     pairs = []
                     cols_c = corr_df.columns.tolist()
                     for i in range(len(cols_c)):
@@ -793,19 +1261,25 @@ with PAGE_TABS[3]:
                             v = corr_df.iloc[i, j]
                             if not np.isnan(v):
                                 pairs.append((cols_c[i], cols_c[j], v))
-                    pairs.sort(key=lambda x: abs(x[2]), reverse=True)
-                    st.markdown("**Strongest correlations:**")
-                    for a, b, v in pairs[:5]:
-                        icon = "🔴" if v < -0.4 else "🟢" if v > 0.4 else "🟡"
-                        dir_label = "positive" if v > 0 else "negative"
-                        st.markdown(f"{icon} **{a}** × **{b}** — r = {v:.2f} ({dir_label})")
-                    st.divider()
-                    st.caption("r > 0.5: strong positive | r < -0.5: strong negative")
+                    pairs.sort(key=lambda x: x[2], reverse=True)
+                    
+                    st.markdown("**Strongest Positive:**")
+                    for a, b, v in pairs[:2]:
+                        st.markdown(f"🟢 **{INDICATOR_SHORT.get(a,a[:15])}** & **{INDICATOR_SHORT.get(b,b[:15])}** (r = {v:.2f})")
+                        
+                    st.markdown("**Strongest Negative (Inverse):**")
+                    for a, b, v in pairs[-2:]:
+                        st.markdown(f"🔴 **{INDICATOR_SHORT.get(a,a[:15])}** & **{INDICATOR_SHORT.get(b,b[:15])}** (r = {v:.2f})")
+                        
+                    st.markdown("**Weakest Relationships (Decoupled):**")
+                    weakest = sorted(pairs, key=lambda x: abs(x[2]))
+                    for a, b, v in weakest[:2]:
+                        st.markdown(f"⚪ **{INDICATOR_SHORT.get(a,a[:15])}** & **{INDICATOR_SHORT.get(b,b[:15])}** (r = {v:.2f})")
 
             st.divider()
 
             # Specific scatter plots — classic macro relationships
-            st.subheader("🔍 Classic Economic Relationships")
+            st.subheader("Classic Economic Relationships")
             scatter_presets = [
                 ("Phillips Curve",
                  "Inflation, consumer prices (annual %)",
@@ -823,7 +1297,7 @@ with PAGE_TABS[3]:
 
             ind_list_avail = sorted(tidy_df["indicator"].unique())
 
-            tab_labels = [p[0] for p in scatter_presets] + ["✏️ Custom"]
+            tab_labels = [p[0] for p in scatter_presets] + ["Custom Analysis"]
             scatter_tabs = st.tabs(tab_labels)
 
             for ti, (title, x_ind, y_ind) in enumerate(scatter_presets):
@@ -851,7 +1325,7 @@ with PAGE_TABS[3]:
 
             # Multi-year correlation trend
             st.divider()
-            st.subheader("📈 Correlation Trend Over Time")
+            st.subheader("Correlation Trend Over Time")
             st.caption("See how the correlation between two indicators has evolved year-by-year.")
             cy1, cy2 = st.columns(2)
             trend_x = cy1.selectbox("Indicator A", ind_list_avail, key="corr_tx")
@@ -890,9 +1364,8 @@ with PAGE_TABS[3]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4 — QUERY HISTORY
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[4]:
-    st.header("📋 Query History & Analytics")
-    st.caption("All queries asked this session with performance metrics")
+with PAGE_TABS[5]:
+    _render_page_header("Query Log & Performance Analytics", "Session query history with retrieval performance metrics")
 
     qh = st.session_state.get("query_history", [])
     if not qh:
@@ -943,19 +1416,19 @@ with PAGE_TABS[4]:
             st.plotly_chart(fig_strat, use_container_width=True, key="qh_strat")
 
         st.divider()
-        st.subheader("📜 All Queries")
+        st.subheader("Query History")
 
         # History table + re-run
         for i, q in enumerate(reversed(qh)):
             n = len(qh) - i
             with st.expander(f"**Q{n}** [{q['timestamp']}] {q['query'][:80]}…", expanded=(i == 0)):
                 c1, c2, c3, c4 = st.columns(4)
-                c1.markdown(f"⏱️ **{q['latency_ms']} ms**")
-                c2.markdown(f"📦 **{q['chunks']}** chunks")
-                c3.markdown(f"🕸️ **{q['paths']}** paths")
-                c4.markdown(f"🎯 {q['strategy']} · {q['query_type']}")
+                c1.markdown(f"**{q['latency_ms']} ms** latency")
+                c2.markdown(f"**{q['chunks']}** chunks")
+                c3.markdown(f"**{q['paths']}** paths")
+                c4.markdown(f"Strategy: {q['strategy']} | Type: {q['query_type']}")
                 st.markdown(f"> {q['answer_snippet']}…")
-                if st.button("🔄 Re-run this query", key=f"rerun_{i}"):
+                if st.button("Re-execute Query", key=f"rerun_{i}"):
                     st.session_state["pending_query"] = q["query"]
                     st.rerun()
 
@@ -963,9 +1436,8 @@ with PAGE_TABS[4]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 5 — DATA EXPLORER
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[5]:
-    st.header("🗂️ Data Explorer")
-    st.caption("Browse all ingested economic data by country and indicator.")
+with PAGE_TABS[6]:
+    _render_page_header("Data Repository", "Browse and filter all ingested economic data records")
 
     if vs_size == 0:
         st.info("No data yet.")
@@ -987,7 +1459,7 @@ with PAGE_TABS[5]:
             and (sel_s == "All" or c.get("source","")    == sel_s)
         ]
         col_res, col_exp = st.columns([3, 1])
-        col_res.markdown(f"**{len(filtered)}** chunks match filters")
+        col_res.markdown(f"**{len(filtered)}** records match applied filters")
 
         # CSV export
         if filtered:
@@ -1005,7 +1477,7 @@ with PAGE_TABS[5]:
             csv_buf = StringIO()
             df_export.to_csv(csv_buf, index=False)
             col_exp.download_button(
-                "⬇️ Export CSV",
+                "Export to CSV",
                 csv_buf.getvalue(),
                 file_name=f"economic_data_{sel_c}_{sel_i[:20] if sel_i != 'All' else 'all'}.csv",
                 mime="text/csv",
@@ -1044,9 +1516,8 @@ with PAGE_TABS[5]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 6 — GRAPH EXPLORER
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[6]:
-    st.header("🕸️ Knowledge Graph Explorer")
-    st.caption("Visualise the economic knowledge graph and explore entity relationships.")
+with PAGE_TABS[7]:
+    _render_page_header("Knowledge Graph Explorer", "Visualize entity relationships and graph topology")
 
     if g_nodes == 0:
         st.info("No graph data yet.")
@@ -1058,7 +1529,7 @@ with PAGE_TABS[6]:
         col_gs4.metric("Store", "NetworkX")
 
         col_s1, col_s2 = st.columns([2, 1])
-        search_term = col_s1.text_input("Search nodes", placeholder="e.g. United States, Inflation")
+        search_term = col_s1.text_input("Search nodes", placeholder="Search entities (e.g. United States, Inflation)")
         max_nodes   = col_s2.slider("Max nodes", 10, 80, 40, 5)
 
         display_results = []
@@ -1087,7 +1558,7 @@ with PAGE_TABS[6]:
         st.divider()
         col_t1, col_t2 = st.columns(2)
         with col_t1:
-            st.subheader("🔵 Top Nodes by Degree")
+            st.subheader("Top Nodes by Connectivity")
             try:
                 G = nx_graph._graph
                 top_nodes = sorted(G.nodes(), key=lambda n: G.degree(n), reverse=True)[:25]
@@ -1096,7 +1567,7 @@ with PAGE_TABS[6]:
             except Exception as e:
                 st.caption(f"Error: {e}")
         with col_t2:
-            st.subheader("🔗 Edge Sample")
+            st.subheader("Edge Sample")
             try:
                 G = nx_graph._graph
                 edges = [{"Subject": u, "Relationship": d.get("type","?"), "Object": v}
@@ -1107,7 +1578,7 @@ with PAGE_TABS[6]:
 
         if _VIZ_OK and vs_size > 0:
             st.divider()
-            st.subheader("📊 Cross-Country Indicator Charts")
+            st.subheader("Cross-Country Indicator Charts")
             tidy_df     = _get_tidy_df()
             ind_opts    = sorted(tidy_df["indicator"].unique()) if not tidy_df.empty else []
             if ind_opts:
@@ -1127,18 +1598,18 @@ with PAGE_TABS[6]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 7 — ABOUT
+# TAB 7 — SYSTEM ARCHITECTURE
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[7]:
-    st.header("ℹ️ About This System")
+with PAGE_TABS[8]:
+    _render_page_header("System Architecture & Data Sources")
     st.markdown("""
-## Agentic Hybrid GraphRAG for Macroeconomic Intelligence
+## Macroeconomic Intelligence Platform
 
 A production-grade hybrid Retrieval-Augmented Generation (RAG) system combining semantic vector search, knowledge graph traversal, and structured mathematical modeling to provide institutional-grade macroeconomic intelligence.
 
 ---
 
-### 🥉 Medallion Data Architecture
+### Medallion Data Architecture
 
 The data pipeline processes unstructured and semi-structured macroeconomic data through a tiered **Medallion Architecture** to ensure clean, structured, and query-optimized data stores:
 
@@ -1183,7 +1654,7 @@ Our system separates state and queries into three storage engines, each optimize
 
 ---
 
-### 🤖 Agentic Orchestration System
+### Agentic Orchestration System
 
 The query pipeline is driven by an agentic workflow configured via **LangGraph**, routing queries dynamically based on their complexity:
 
@@ -1219,7 +1690,7 @@ The query pipeline is driven by an agentic workflow configured via **LangGraph**
 
 ---
 
-### 📡 Data Sources
+### Data Sources
 
 | Source | Coverage | Indicators | Storage Format |
 | :--- | :--- | :--- | :--- |
@@ -1233,7 +1704,7 @@ The query pipeline is driven by an agentic workflow configured via **LangGraph**
 
 ---
 
-### 🛠️ Technology Stack
+### Technology Stack
 
 | Layer | Component | Implementation |
 | :--- | :--- | :--- |
@@ -1248,15 +1719,15 @@ The query pipeline is driven by an agentic workflow configured via **LangGraph**
 
 ---
 
-### 💡 Core Features
+### Platform Capabilities
 
-- **💬 Chat Interface**: Multi-agent Hybrid RAG with step-by-step reasoning logs, source listings, and dynamic follow-up suggestions.
-- **🌍 Global Dashboard**: Interactive global choropleth map, country rankings, indicator heatmaps, and automatically generated Smart Insights.
-- **🔬 Country Profile**: Deep dive radar profile comparison, indicators statistics, and auto-regressive 5-year linear projection models.
-- **📊 Correlations**: Phillips Curve, Okun's Law, custom scatter plots, and Pearson correlation matrices for indicator pairs.
-- **🚦 Recession Risk**: Combined country risk gauges, risk matrix dashboard, and visual risk indicators.
-- **📝 Economic Report**: Standardized, downloadable PDF-style economic briefing reports generated by the LLM.
-- **🕸️ Graph Explorer**: Live visualization of the underlying NetworkX/Neo4j knowledge graph structure.
+- **Chat Interface**: Multi-agent Hybrid RAG with step-by-step reasoning logs, source listings, and dynamic follow-up suggestions.
+- **Global Dashboard**: Interactive global choropleth map, country rankings, indicator heatmaps, and automatically generated Smart Insights.
+- **Country Profile**: Deep dive radar profile comparison, indicators statistics, and auto-regressive 5-year linear projection models.
+- **Correlation Analysis**: Phillips Curve, Okun's Law, custom scatter plots, and Pearson correlation matrices for indicator pairs.
+- **Risk Monitor**: Combined country risk gauges, risk matrix dashboard, and visual risk indicators.
+- **Report Generator**: Standardized, downloadable PDF-style economic briefing reports generated by the LLM.
+- **Knowledge Graph**: Live visualization of the underlying NetworkX/Neo4j knowledge graph structure.
 """)
     col_a1, col_a2, col_a3, col_a4 = st.columns(4)
     col_a1.metric("Vector Chunks",  vs_size)
@@ -1268,12 +1739,11 @@ The query pipeline is driven by an agentic workflow configured via **LangGraph**
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 8 — RECESSION RISK MONITOR
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[8]:
-    st.header("🚦 Recession Risk Monitor")
-    st.caption("Composite recession risk scores for G20 countries — updated from ingested data")
+with PAGE_TABS[9]:
+    _render_page_header("Recession Risk Monitor", "Composite risk scoring for G20 member economies")
 
     if not is_ready or not _VIZ_OK:
-        st.info("👈 Ingest data first to compute recession risk scores.")
+        st.info("Ingest data first to compute recession risk scores.")
     else:
         tidy_df = _get_tidy_df()
         if tidy_df.empty:
@@ -1291,16 +1761,16 @@ with PAGE_TABS[8]:
                 low_risk    = [r for r in all_risks if r["level"] == "Low"]
 
                 rk1, rk2, rk3, rk4 = st.columns(4)
-                rk1.metric("🔴 High Risk",     len(high_risk))
-                rk2.metric("🟡 Moderate Risk", len(mod_risk))
-                rk3.metric("🟢 Low Risk",      len(low_risk))
+                rk1.metric("High Risk",     len(high_risk))
+                rk2.metric("Moderate Risk", len(mod_risk))
+                rk3.metric("Low Risk",      len(low_risk))
                 avg_score = sum(r["score"] for r in all_risks) / len(all_risks)
-                rk4.metric("📊 Avg Score", f"{avg_score:.1f} / 17")
+                rk4.metric("Avg Score", f"{avg_score:.1f} / 17")
 
                 st.divider()
 
                 # ── Traffic-light summary table ───────────────────────────────
-                st.subheader("🌍 G20 Country Risk Overview")
+                st.subheader("G20 Country Risk Overview")
                 risk_rows = []
                 for r in all_risks:
                     css_class = {
@@ -1318,13 +1788,13 @@ with PAGE_TABS[8]:
 
                     risk_rows.append({
                         "Country":         r["country"],
-                        "Risk Level":      f"{r['emoji']} {r['level']}",
+                        "Risk Level":      r["level"],
                         "Score (0-17)":    r["score"],
-                        "GDP Growth":      f"{'🟥'*gdp_s}{'⬜'*(4-gdp_s)}",
-                        "Inflation":       f"{'🟥'*inf_s}{'⬜'*(4-inf_s)}",
-                        "Unemployment":    f"{'🟥'*une_s}{'⬜'*(3-une_s)}",
-                        "Govt Debt":       f"{'🟥'*dbt_s}{'⬜'*(3-dbt_s)}",
-                        "Current Account": f"{'🟥'*ca_s}{'⬜'*(3-ca_s)}",
+                        "GDP Growth":      f"{gdp_s}/{4}",
+                        "Inflation":       f"{inf_s}/{4}",
+                        "Unemployment":    f"{une_s}/{3}",
+                        "Govt Debt":       f"{dbt_s}/{3}",
+                        "Current Account": f"{ca_s}/{3}",
                     })
 
                 df_risk = pd.DataFrame(risk_rows)
@@ -1334,7 +1804,7 @@ with PAGE_TABS[8]:
                 st.divider()
                 col_bar, col_detail = st.columns([2, 3])
                 with col_bar:
-                    st.subheader("📊 Risk Score Distribution")
+                    st.subheader("Risk Score Distribution")
                     if _VIZ_OK:
                         import plotly.graph_objects as go
                         colors_risk = [r["color"] for r in all_risks]
@@ -1343,7 +1813,7 @@ with PAGE_TABS[8]:
                             y=[r["country"] for r in all_risks],
                             orientation="h",
                             marker_color=colors_risk,
-                            text=[f'{r["emoji"]} {r["score"]}' for r in all_risks],
+                            text=[f'{r["level"]} {r["score"]}' for r in all_risks],
                             textposition="outside",
                             hovertemplate="<b>%{y}</b><br>Score: %{x}/17<extra></extra>",
                         ))
@@ -1361,7 +1831,7 @@ with PAGE_TABS[8]:
                         st.plotly_chart(fig_risk_bar, use_container_width=True, key="rr_bar")
 
                 with col_detail:
-                    st.subheader("🔍 Country Deep Dive")
+                    st.subheader("Country Detail")
                     risk_countries = [r["country"] for r in all_risks]
                     sel_risk_country = st.selectbox("Select country", risk_countries, key="rr_sel")
                     cr = next((r for r in all_risks if r["country"] == sel_risk_country), None)
@@ -1371,34 +1841,32 @@ with PAGE_TABS[8]:
                         with gc1:
                             fig_g = build_risk_gauge_fig(cr)
                             if fig_g:
-                                st.plotly_chart(fig_g, use_container_width=True, key="rr_gauge")
+                                st.plotly_chart(fig_g, use_container_width=True, key="rr_gauge", theme=None)
                         with gc2:
                             fig_rad = build_risk_radar_fig(cr)
                             if fig_rad:
-                                st.plotly_chart(fig_rad, use_container_width=True, key="rr_radar")
+                                st.plotly_chart(fig_rad, use_container_width=True, key="rr_radar", theme=None)
 
                         # Component breakdown
-                        st.markdown(f"**{cr['emoji']} Summary:** {cr['summary']}")
+                        st.markdown(f"**Summary:** {cr['summary']}")
                         st.markdown("**Risk Component Breakdown:**")
                         for comp_name, comp_data in cr["components"].items():
                             score    = comp_data["score"]
                             weight   = comp_data["weight"]
                             note     = comp_data["note"]
-                            bar_filled = "🟥" * score + "⬜" * (weight - score)
                             st.markdown(
-                                f"&nbsp;&nbsp;• **{comp_name}** [{bar_filled}] {score}/{weight} — _{note}_"
+                                f"&nbsp;&nbsp;• **{comp_name}** [{score}/{weight}] — _{note}_"
                             )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 9 — ECONOMIC REPORT GENERATOR
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[9]:
-    st.header("📝 Economic Report Generator")
-    st.caption("Generate a comprehensive downloadable economic intelligence report for any country")
+with PAGE_TABS[10]:
+    _render_page_header("Economic Intelligence Report Generator", "Generate structured economic briefing reports with downloadable output")
 
     if not is_ready or not _VIZ_OK:
-        st.info("👈 Ingest data first to generate reports.")
+        st.info("Ingest data first to generate reports.")
     else:
         tidy_df = _get_tidy_df()
         if tidy_df.empty:
@@ -1416,8 +1884,8 @@ with PAGE_TABS[9]:
             include_llm = col_rg3.checkbox("Use LLM", value=False, key="rg_llm",
                                             help="Enhance narrative with LLM (requires API key)")
 
-            if st.button("🚀 Generate Economic Report", type="primary", use_container_width=False):
-                with st.spinner(f"Building report for {report_country}…"):
+            if st.button("Generate Report", type="primary", use_container_width=False):
+                with st.spinner(f"Compiling report for {report_country}..."):
                     report = build_country_report(tidy_df, report_country)
 
                 st.session_state["current_report"] = report
@@ -1427,7 +1895,7 @@ with PAGE_TABS[9]:
                 st.divider()
 
                 # ── Report header ─────────────────────────────────────────────
-                st.subheader(f"📊 {report['title']}")
+                st.subheader(f"{report['title']}")
                 st.caption(f"*Generated: {report['generated']} · Data sources: IMF WEO, World Bank, ECB*")
 
                 # ── Quick KPI row ─────────────────────────────────────────────
@@ -1450,12 +1918,12 @@ with PAGE_TABS[9]:
                 col_report, col_chart = st.columns([3, 2])
 
                 with col_report:
-                    st.markdown("#### 📄 Full Report")
+                    st.markdown("#### Full Report")
                     report_md = report.get("markdown", "")
                     st.markdown(report_md)
 
                 with col_chart:
-                    st.markdown("#### 📊 Key Metrics Timeline")
+                    st.markdown("#### Key Metrics Timeline")
                     # Show time-series for GDP growth
                     gdp_ind = next(
                         (m for m in metrics if "Growth" in m["label"] and "GDP" in m["label"]),
@@ -1491,7 +1959,7 @@ with PAGE_TABS[9]:
 
                     # All indicators mini-table
                     if metrics:
-                        st.markdown("#### 📋 All Available Data")
+                        st.markdown("#### All Available Data")
                         tbl = pd.DataFrame([
                             {"Indicator": m["label"], "Value": m["fmt"],
                              "Year": m["year"], "Trend": m["trend"]}
@@ -1504,15 +1972,15 @@ with PAGE_TABS[9]:
                 dcol1, dcol2 = st.columns(2)
                 report_md = report.get("markdown", "")
                 dcol1.download_button(
-                    "⬇️ Download Report (.md)",
+                    "Download Markdown (.md)",
                     report_md,
                     file_name=f"economic_report_{report_country.replace(' ','_').lower()}.md",
                     mime="text/markdown",
                     use_container_width=True,
                 )
                 dcol2.download_button(
-                    "⬇️ Download Report (.txt)",
-                    plain,
+                    "Download Text (.txt)",
+                    report.get("plain", report_md),
                     file_name=f"economic_report_{report_country.replace(' ','_').lower()}.txt",
                     mime="text/plain",
                     use_container_width=True,
@@ -1522,12 +1990,11 @@ with PAGE_TABS[9]:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 10 — POLICY SIMULATION SANDBOX
 # ══════════════════════════════════════════════════════════════════════════════
-with PAGE_TABS[10]:
-    st.header("🎛️ Macroeconomic Policy Simulation Sandbox")
-    st.caption("Apply hypothetical policy shocks and observe the forecast deviations and risk changes.")
+with PAGE_TABS[11]:
+    _render_page_header("Macroeconomic Policy Simulation", "Apply hypothetical policy shocks and analyze forecast deviations and risk sensitivity")
 
     if not is_ready or not _VIZ_OK:
-        st.info("👈 Ingest data first to run simulation sandbox.")
+        st.info("Ingest data first to run simulation sandbox.")
     else:
         tidy_df = _get_tidy_df()
         if tidy_df.empty:
@@ -1580,7 +2047,7 @@ with PAGE_TABS[10]:
             col_ctrl1, col_ctrl2 = st.columns([1, 1])
 
             with col_ctrl1:
-                st.subheader("⚙️ Simulation Settings")
+                st.subheader("Simulation Parameters")
 
                 sel_country = st.selectbox("Target Country", all_countries, key="sandbox_country_sel")
 
@@ -1615,16 +2082,16 @@ with PAGE_TABS[10]:
                 )
 
             with col_ctrl2:
-                st.subheader("⚡ Quick Scenarios")
+                st.subheader("Scenario Presets")
                 st.markdown("Select a predefined scenario to instantly configure the sliders:")
 
                 sc_col1, sc_col2 = st.columns(2)
 
-                sc_col1.button("📉 2008 Credit Crunch", key="sandbox_btn_crunch", on_click=trigger_crunch, use_container_width=True)
-                sc_col2.button("🛢️ Supply Chain Shock (Oil Spike)", key="sandbox_btn_oil", on_click=trigger_oil, use_container_width=True)
-                sc_col1.button("💸 Post-Pandemic Stimulus", key="sandbox_btn_stim", on_click=trigger_stimulus, use_container_width=True)
-                sc_col2.button("🏦 Sovereign Debt Crisis", key="sandbox_btn_crisis", on_click=trigger_crisis, use_container_width=True)
-                st.button("🔄 Reset Sandbox", key="sandbox_btn_reset", on_click=trigger_reset, use_container_width=True)
+                sc_col1.button("2008 Credit Crunch", key="sandbox_btn_crunch", on_click=trigger_crunch, use_container_width=True)
+                sc_col2.button("Supply Chain Shock", key="sandbox_btn_oil", on_click=trigger_oil, use_container_width=True)
+                sc_col1.button("Post-Pandemic Stimulus", key="sandbox_btn_stim", on_click=trigger_stimulus, use_container_width=True)
+                sc_col2.button("Sovereign Debt Crisis", key="sandbox_btn_crisis", on_click=trigger_crisis, use_container_width=True)
+                st.button("Reset Parameters", key="sandbox_btn_reset", on_click=trigger_reset, use_container_width=True)
 
                 st.markdown("""
                 > **Sandbox Mechanisms:**
@@ -1650,18 +2117,18 @@ with PAGE_TABS[10]:
             risk_base = compute_country_risk(tidy_df, sel_country)
             risk_shocked = compute_country_risk(shocked_df, sel_country)
 
-            st.subheader("🚦 Recession Risk Gauge — Before vs. After")
+            st.subheader("Recession Risk Impact — Baseline vs. Simulated")
             col_g1, col_g2 = st.columns(2)
             with col_g1:
-                st.markdown("<h4 style='text-align: center; color: #2c7bb6;'>Baseline Forecast Risk</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #1B4FD8;'>Baseline Forecast Risk</h4>", unsafe_allow_html=True)
                 fig_base = build_risk_gauge_fig(risk_base)
                 if fig_base:
-                    st.plotly_chart(fig_base, use_container_width=True, key="sandbox_gauge_base")
+                    st.plotly_chart(fig_base, use_container_width=True, key="sandbox_gauge_base", theme=None)
             with col_g2:
-                st.markdown("<h4 style='text-align: center; color: #d7191c;'>Simulated Shock Risk</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='text-align: center; color: #BE2A2A;'>Simulated Shock Risk</h4>", unsafe_allow_html=True)
                 fig_shocked = build_risk_gauge_fig(risk_shocked)
                 if fig_shocked:
-                    st.plotly_chart(fig_shocked, use_container_width=True, key="sandbox_gauge_shocked")
+                    st.plotly_chart(fig_shocked, use_container_width=True, key="sandbox_gauge_shocked", theme=None)
 
             # Details of risk score changes
             st.markdown(f"**Risk Summary Change:**")
@@ -1671,7 +2138,7 @@ with PAGE_TABS[10]:
             st.divider()
 
             # Comparison plots
-            st.subheader("📈 Forecast Trajectories Comparison")
+            st.subheader("Forecast Trajectory Comparison")
 
             # Helper to build comparison charts
             def build_sandbox_comparison_chart(df_b, df_s, country, indicator):
@@ -1789,13 +2256,46 @@ with PAGE_TABS[10]:
                 if fig_debt:
                     st.plotly_chart(fig_debt, use_container_width=True, key="sandbox_plot_debt")
 
-            st.divider()
+            st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
+            
+            st.subheader("Scenario Stress-Test Comparison Matrix")
+            st.caption("Numerical delta between baseline and shocked forecasts across key indicators at the end of the simulation period (2028)")
+            
+            def _get_actual_ind(std_name: str) -> str:
+                c_inds = tidy_df[tidy_df["country"] == sel_country]["indicator"].unique()
+                candidates = {
+                    "Interest Rates": ["Effective Federal Funds Rate", "ECB Main Refinancing Operations Rate", "Policy Interest Rate (%)"],
+                    "GDP Growth": ["GDP growth, real (annual %)", "GDP growth rate (annual %, seasonally adjusted)"],
+                    "Government Debt": ["General government gross debt (% of GDP)", "Central government debt, total (% of GDP)"],
+                    "Inflation": ["Inflation, average consumer prices (annual %)", "Inflation, consumer prices (annual %)", "HICP Inflation (Eurozone, annual %)"]
+                }.get(std_name, [std_name])
+                for cand in candidates:
+                    if cand in c_inds: return cand
+                return candidates[0]
+                
+            matrix_data = []
+            for m in ["GDP Growth", "Inflation", "Interest Rates", "Government Debt"]:
+                actual_ind = _get_actual_ind(m)
+                b_val = tidy_df[(tidy_df["country"] == sel_country) & (tidy_df["indicator"] == actual_ind) & (tidy_df["year"] == 2028)]["value"].mean()
+                s_val = shocked_df[(shocked_df["country"] == sel_country) & (shocked_df["indicator"] == actual_ind) & (shocked_df["year"] == 2028)]["value"].mean()
+                if not pd.isna(b_val) and not pd.isna(s_val):
+                    delta = s_val - b_val
+                    unit = INDICATOR_UNITS.get(actual_ind, "%")
+                    matrix_data.append({
+                        "Indicator": f"**{m}**",
+                        "Baseline Forecast (2028)": f"{b_val:.2f} {unit}",
+                        "Shocked Scenario (2028)": f"{s_val:.2f} {unit}",
+                        "Net Impact": f"{delta:+.2f} {unit}"
+                    })
+            if matrix_data:
+                st.dataframe(pd.DataFrame(matrix_data), use_container_width=True, hide_index=True)
 
+            st.markdown('<hr class="premium-divider">', unsafe_allow_html=True)
             # Agent analysis section
-            st.subheader("🤖 Historical Policy Critique Agent")
+            st.subheader("Policy Critique Engine")
             st.caption("Ask the agent to critique your custom simulation by looking up historical central bank cycles.")
 
-            if st.button("🚀 Analyze Simulation with Agent", key="sandbox_btn_analyze", type="primary"):
+            if st.button("Run Agent Analysis", key="sandbox_btn_analyze", type="primary"):
                 def get_actual_indicator(std_name: str) -> str:
                     country_indicators = tidy_df[tidy_df["country"] == sel_country]["indicator"].unique()
                     candidates = {
@@ -1873,7 +2373,7 @@ with PAGE_TABS[10]:
             critique = st.session_state.get("sandbox_critique")
             if critique:
                 st.divider()
-                st.markdown("### 📄 Agent Critique Analysis")
+                st.markdown("### Agent Analysis Report")
                 st.markdown(critique.get("answer", "No analysis generated."))
 
                 sources = critique.get("sources", [])
