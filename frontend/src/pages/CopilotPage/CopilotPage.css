@@ -1,0 +1,179 @@
+.copilot-page {
+  display: flex;
+  height: calc(100vh - var(--navbar-height) - 48px);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin: -8px;
+}
+
+.copilot-sidebar {
+  width: 280px;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+}
+
+.copilot-sidebar__header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.copilot-sidebar__header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.copilot-history {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.copilot-history-item {
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copilot-history-item:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.copilot-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--brand-gradient);
+  display: grid;
+  place-items: center;
+}
+
+.copilot-chat-area {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.chat-message {
+  display: flex;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.chat-message--ai {
+  align-self: flex-start;
+}
+
+.chat-message--user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.chat-message--ai .chat-avatar {
+  background: var(--bg-feature-icon);
+  color: var(--brand-primary);
+}
+
+.chat-message--user .chat-avatar {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.chat-bubble {
+  background: var(--bg-primary);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  border: 1px solid var(--border-color);
+}
+
+.chat-message--user .chat-bubble {
+  background: var(--text-primary);
+  color: white;
+  border-color: var(--text-primary);
+}
+
+.copilot-input-area {
+  padding: 24px 32px;
+  border-top: 1px solid var(--border-color);
+}
+
+.copilot-form {
+  display: flex;
+  gap: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+}
+
+.copilot-form:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-glow);
+}
+
+.copilot-form input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0 16px;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.copilot-form button {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.copilot-disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}

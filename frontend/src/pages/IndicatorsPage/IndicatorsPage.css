@@ -1,0 +1,40 @@
+.indicators-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.indicators-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 0 16px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.indicators-table th {
+  background: var(--bg-secondary);
+}
+
+.indicators-table td {
+  padding: 16px 20px;
+}

@@ -1,0 +1,74 @@
+.global-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: var(--font-weight-extrabold);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 8px;
+}
+
+.tab {
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab--active {
+  color: var(--brand-primary);
+  border-bottom-color: var(--brand-primary);
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.heatmap-placeholder {
+  flex: 1;
+  min-height: 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  gap: 16px;
+}
+
+.heatmap-placeholder-world {
+  font-size: 64px;
+  opacity: 0.5;
+}

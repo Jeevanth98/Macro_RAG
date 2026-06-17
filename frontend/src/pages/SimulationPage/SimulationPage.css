@@ -1,0 +1,110 @@
+.sim-input, .sim-slider {
+  width: 100%;
+}
+
+.sim-input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-color);
+  font-family: inherit;
+}
+
+.sim-slider {
+  -webkit-appearance: none;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 4px;
+  outline: none;
+}
+
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--brand-color);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.sim-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.sim-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--brand-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sim-risk-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+
+.risk-high {
+  background: var(--danger-color-light);
+  color: var(--danger-color);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.risk-medium {
+  background: var(--warning-color-light);
+  color: var(--warning-color);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.risk-low {
+  background: var(--success-color-light);
+  color: var(--success-color);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.sim-list {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-color);
+}
+
+.sim-scenarios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.scenario-card {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.scenario-card h5 {
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scenario-card p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.scenario-card.probable h5 { color: var(--brand-color); }
+.scenario-card.optimistic h5 { color: var(--success-color); }
+.scenario-card.pessimistic h5 { color: var(--danger-color); }

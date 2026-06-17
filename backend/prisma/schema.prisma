@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Kpi {
+  id             String  @id @default(uuid())
+  title          String
+  period         String
+  value          String
+  subtitle       String
+  trend          String // e.g., "up", "down", "neutral"
+  sparkline      String // Store JSON array of numbers as string
+  sparklineColor String
+}
+
+model ChartData {
+  id    String @id @default(uuid())
+  year  String
+  value Float
+}
+
+model Insight {
+  id      String @id @default(uuid())
+  title   String
+  content String
+  type    String // e.g., "warning", "info", "success"
+  date    String
+  tags    String // Store JSON array as string
+  url     String?
+}
+
+model MapData {
+  id        String @id @default(uuid())
+  country   String
+  code      String // e.g., "USA", "BRA"
+  value     Float
+  indicator String @default("GDP Growth") // e.g., "GDP Growth", "Inflation", "Unemployment"
+}
+
+model Watchlist {
+  id         String @id @default(uuid())
+  indicator  String
+  country    String
+  latest     String
+  change       String
+  changeType   String // e.g., "up", "down", "neutral"
+  alertStatus  String @default("Set") // "Set" or "Active"
+  triggerValue Float?
+}

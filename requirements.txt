@@ -20,9 +20,9 @@ chromadb
 # Graph database
 neo4j
 
-# UI
-streamlit
-plotly
+# Backend API
+fastapi
+uvicorn
 
 # NLP
 spacy

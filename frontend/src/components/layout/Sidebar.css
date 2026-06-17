@@ -1,0 +1,202 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 20px;
+  z-index: var(--z-sidebar);
+  overflow-y: auto;
+}
+
+/* ── Logo ───────────────────────────────────────────────────────────────── */
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+  margin-bottom: 28px;
+}
+
+.sidebar__logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: conic-gradient(#6D5DFC, #8A7BFF, #B8AEFF, #6D5DFC);
+  box-shadow: 0 0 16px rgba(109, 93, 252, 0.3);
+  flex-shrink: 0;
+}
+
+.sidebar__logo-text {
+  font-size: 20px;
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: 2.5px;
+  color: var(--text-primary);
+}
+
+/* ── Navigation ─────────────────────────────────────────────────────────── */
+
+.sidebar__nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.sidebar__link:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.sidebar__link--active {
+  background: var(--bg-feature-icon);
+  color: var(--brand-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.sidebar__link--active::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--brand-primary);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+
+/* ── Promo Card ─────────────────────────────────────────────────────────── */
+
+.sidebar__promo {
+  margin: 16px 0;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #F0EDFF 0%, #E8E4FF 100%);
+  border-radius: var(--radius-lg);
+  position: relative;
+}
+
+.sidebar__promo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--brand-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.sidebar__promo-content strong {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  color: var(--brand-primary);
+}
+
+.sidebar__promo-content span {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-primary);
+}
+
+.sidebar__promo-content p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.sidebar__promo-btn {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-gradient);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  width: 100%;
+  justify-content: center;
+  transition: all var(--transition-normal);
+}
+
+.sidebar__promo-btn:hover {
+  background: var(--brand-gradient-hover);
+  transform: translateY(-1px);
+}
+
+/* ── User Profile ───────────────────────────────────────────────────────── */
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 8px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.sidebar__user:hover {
+  background: var(--bg-secondary);
+}
+
+.sidebar__user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--brand-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.sidebar__user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__user-name {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.sidebar__user-plan {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sidebar__user-chevron {
+  color: var(--text-muted);
+}
