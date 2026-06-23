@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import apiRoutes from './routes/api';
+import approvalsRoutes from './routes/approvals';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -16,6 +17,7 @@ import { syncFredData } from './services/syncData';
 
 // API Routes
 app.use('/api/v1', apiRoutes);
+app.use('/api/v1/approvals', approvalsRoutes);
 
 // Sync data on startup
 syncFredData().catch(console.error);

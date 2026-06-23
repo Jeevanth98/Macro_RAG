@@ -88,5 +88,22 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/data/series/${encodeURIComponent(country)}/${encodeURIComponent(indicator)}`);
     if (!res.ok) throw new Error('Failed to fetch series');
     return res.json();
+  },
+
+  // Approvals & Validation
+  getApprovals: async (status = 'PENDING') => {
+    const res = await fetch(`${API_BASE_URL}/approvals?status=${status}`);
+    if (!res.ok) throw new Error('Failed to fetch approvals');
+    return res.json();
+  },
+  approveData: async (id) => {
+    const res = await fetch(`${API_BASE_URL}/approvals/${id}/approve`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to approve data');
+    return res.json();
+  },
+  rejectData: async (id) => {
+    const res = await fetch(`${API_BASE_URL}/approvals/${id}/reject`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to reject data');
+    return res.json();
   }
 };

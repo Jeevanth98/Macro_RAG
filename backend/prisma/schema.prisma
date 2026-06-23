@@ -16,12 +16,18 @@ model Kpi {
   trend          String // e.g., "up", "down", "neutral"
   sparkline      String // Store JSON array of numbers as string
   sparklineColor String
+  source         String   @default("FRED")
+  extractedAt    DateTime @default(now())
+  validationScore Float   @default(100.0)
 }
 
 model ChartData {
   id    String @id @default(uuid())
   year  String
   value Float
+  source         String   @default("FRED")
+  extractedAt    DateTime @default(now())
+  validationScore Float   @default(100.0)
 }
 
 model Insight {
@@ -51,4 +57,15 @@ model Watchlist {
   changeType   String // e.g., "up", "down", "neutral"
   alertStatus  String @default("Set") // "Set" or "Active"
   triggerValue Float?
+}
+
+model DataApprovalQueue {
+  id                String   @id @default(uuid())
+  dataType          String   // e.g., "KPI", "ChartData"
+  source            String
+  extractedAt       DateTime @default(now())
+  payload           String   // JSON payload of the data
+  validationScore   Float
+  validationDetails String   // JSON of the layer scores
+  status            String   @default("PENDING") // PENDING, APPROVED, REJECTED
 }

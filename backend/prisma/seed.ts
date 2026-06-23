@@ -181,6 +181,280 @@ async function main() {
     await prisma.watchlist.create({ data: item });
   }
 
+  console.log('Clearing old validation data...');
+  await prisma.dataApprovalQueue.deleteMany();
+
+  console.log('Seeding Data Validation Queue...');
+  
+  // 12 Pending items requiring manual review (score <= 80)
+  const pendingQueue = [
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 10), // 10 mins ago
+      payload: JSON.stringify({
+        title: 'US Core Inflation (Critical Anomaly)',
+        period: 'May YoY',
+        value: '18.5%',
+        subtitle: 'Critical anomaly detected',
+        trend: 'up',
+        sparkline: JSON.stringify([3.6, 3.8, 4.2, 5.1, 10.0, 15.2, 18.5]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 77.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing or invalid values detected' },
+        range: { score: 10, weight: 0.25, reason: 'Rate value (18.5%) is outside historically normal US core inflation bounds (0-15%)' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 20), // 20 mins ago
+      payload: JSON.stringify({
+        title: 'US Unemployment Rate (Data Anomaly)',
+        period: 'May',
+        value: 'NaN',
+        subtitle: 'Missing data point',
+        trend: 'neutral',
+        sparkline: JSON.stringify([3.9, 3.9, null, 3.8, 3.9]),
+        sparklineColor: '#94A3B8'
+      }),
+      validationScore: 72.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 50, weight: 0.3, reason: 'Value is not a standard numeric/string type (found NaN/null)' },
+        quality: { score: 50, weight: 0.25, reason: 'Found missing/null values in sparkline data' },
+        range: { score: 100, weight: 0.25, reason: 'Values within acceptable bounds' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 30),
+      payload: JSON.stringify({
+        title: 'Euro Area GDP Growth (Extreme Shift)',
+        period: 'Q1 QoQ',
+        value: '-8.5%',
+        subtitle: 'Extreme revision',
+        trend: 'down',
+        sparkline: JSON.stringify([0.1, 0.2, -0.1, 0.3, -8.5]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 77.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing values detected' },
+        range: { score: 10, weight: 0.25, reason: 'QoQ Growth rate (-8.5%) is outside normal expansion/contraction bounds (-4% to 4%)' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 40),
+      payload: JSON.stringify({
+        title: 'UK Inflation Rate (Format Error)',
+        period: 'May YoY',
+        value: ['3.2%'],
+        subtitle: 'Format mismatch',
+        trend: 'down',
+        sparkline: JSON.stringify([4.0, 3.8, 3.5, 3.2]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 72.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 50, weight: 0.3, reason: 'Value is passed as an Array instead of string/number' },
+        quality: { score: 50, weight: 0.25, reason: 'Warning: nested array data formats' },
+        range: { score: 100, weight: 0.25, reason: 'Value is within acceptable ranges' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 50),
+      payload: JSON.stringify({
+        title: 'Japan Policy Interest Rate (Null Values)',
+        period: 'Q2',
+        value: '0.1%',
+        subtitle: 'Data quality alert',
+        trend: 'neutral',
+        sparkline: JSON.stringify([0.1, null, null, null, 0.1]),
+        sparklineColor: '#3B82F6'
+      }),
+      validationScore: 72.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 50, weight: 0.25, reason: 'Sparkline contains 3 missing or null values' },
+        range: { score: 100, weight: 0.25, reason: 'Values within normal ranges' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 60),
+      payload: JSON.stringify({
+        title: 'Brazil Unemployment Rate (Extreme Alert)',
+        period: 'Apr',
+        value: '45.2%',
+        subtitle: 'Abnormal spike',
+        trend: 'up',
+        sparkline: JSON.stringify([7.9, 8.0, 7.8, 45.2]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 77.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing values' },
+        range: { score: 10, weight: 0.25, reason: 'Unemployment rate (45.2%) is outside typical bounds (0% to 30%)' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'SinoDataScrape',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 70),
+      payload: JSON.stringify({
+        title: 'China Retail Sales YoY (Scraper Source)',
+        period: 'May YoY',
+        value: '4.2%',
+        subtitle: 'Ingested via external scraper',
+        trend: 'up',
+        sparkline: JSON.stringify([3.5, 3.8, 4.0, 4.2]),
+        sparklineColor: '#10B981'
+      }),
+      validationScore: 67.5,
+      validationDetails: JSON.stringify({
+        source: { score: 50, weight: 0.2, reason: 'Ingested from unverified scraper (SinoDataScrape)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing values' },
+        range: { score: 50, weight: 0.25, reason: 'Scraper source does not guarantee historic calibration' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 80),
+      payload: JSON.stringify({
+        title: 'Germany Industrial Production (NaN Value)',
+        period: 'May YoY',
+        value: 'NaN',
+        subtitle: 'Corrupted database field',
+        trend: 'down',
+        sparkline: JSON.stringify([-1.2, -1.0, -1.5, NaN]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 72.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 50, weight: 0.3, reason: 'Value is corrupted string NaN' },
+        quality: { score: 50, weight: 0.25, reason: 'Sparkline array contains NaN value' },
+        range: { score: 100, weight: 0.25, reason: 'Values within normal bounds' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 90),
+      payload: JSON.stringify({
+        title: 'India Consumer Confidence (Scale Violation)',
+        period: 'Q1',
+        value: '250.0',
+        subtitle: 'Scale out of bounds',
+        trend: 'up',
+        sparkline: JSON.stringify([110, 115, 120, 250]),
+        sparklineColor: '#10B981'
+      }),
+      validationScore: 77.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing values' },
+        range: { score: 10, weight: 0.25, reason: 'Consumer confidence index (250) exceeds maximum standard scale limits (0-150)' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 100),
+      payload: JSON.stringify({
+        title: 'US Government Debt to GDP (Missing Fields)',
+        period: '2024',
+        value: '124.0%',
+        sparkline: JSON.stringify([120, 122, 123, 124])
+      }),
+      validationScore: 70.0,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 50, weight: 0.3, reason: 'Payload is missing mandatory fields: "trend", "subtitle"' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing data inside provided fields' },
+        range: { score: 100, weight: 0.25, reason: 'Debt ratio (124%) is within reasonable G20 parameters' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 110),
+      payload: JSON.stringify({
+        title: 'Australia CPI (Extreme Deflation Anomaly)',
+        period: 'Q1 YoY',
+        value: '-5.4%',
+        subtitle: 'Abnormal deflation rate',
+        trend: 'down',
+        sparkline: JSON.stringify([2.1, 1.8, 0.5, -5.4]),
+        sparklineColor: '#EF4444'
+      }),
+      validationScore: 77.5,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 100, weight: 0.3, reason: 'Format looks correct' },
+        quality: { score: 100, weight: 0.25, reason: 'No missing values' },
+        range: { score: 10, weight: 0.25, reason: 'Annual deflation (-5.4%) exceeds stable parameters for advanced G20 economies (typical floor: -2%)' }
+      }),
+      status: 'PENDING'
+    },
+    {
+      dataType: 'KPI',
+      source: 'FRED',
+      extractedAt: new Date(Date.now() - 1000 * 60 * 120),
+      payload: JSON.stringify({
+        title: 'Canada Manufacturing PMI (Empty Sparkline)',
+        period: 'May',
+        value: '51.5',
+        subtitle: 'PMI expansion',
+        trend: 'up',
+        sparkline: JSON.stringify([]),
+        sparklineColor: '#10B981'
+      }),
+      validationScore: 76.0,
+      validationDetails: JSON.stringify({
+        source: { score: 100, weight: 0.2, reason: 'Highly trusted official source (FRED)' },
+        format: { score: 80, weight: 0.3, reason: 'Format: sparkline payload is an empty array' },
+        quality: { score: 100, weight: 0.25, reason: 'No null values in standard parameters' },
+        range: { score: 100, weight: 0.25, reason: 'PMI index (51.5) is normal' }
+      }),
+      status: 'PENDING'
+    }
+  ];
+
+  for (const item of pendingQueue) {
+    await prisma.dataApprovalQueue.create({ data: item });
+  }
+
   console.log('Seeding completed!');
 }
 

@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { fetchFredSeries } from './fredService';
+import { DataValidator } from './validator';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
+const validator = new DataValidator();
 
 export async function syncFredData() {
   console.log('Starting FRED data synchronization...');
@@ -115,7 +117,45 @@ export async function syncFredData() {
     }
 
     for (const kpi of kpisToInsert) {
-      await prisma.kpi.create({ data: kpi });
+      const validation = validator.validate({
+        source: 'FRED',
+        dataType: 'KPI',
+        payload: kpi
+      });
+
+      if (validation.isAutoApproved) {
+        await prisma.kpi.create({ 
+          data: {
+            ...kpi,
+            source: validation.metadata.source,
+            extractedAt: validation.metadata.extractedAt,
+            validationScore: validation.finalScore
+          } 
+        });
+        await prisma.dataApprovalQueue.create({
+          data: {
+            dataType: 'KPI',
+            source: validation.metadata.source,
+            extractedAt: validation.metadata.extractedAt,
+            payload: JSON.stringify(kpi),
+            validationScore: validation.finalScore,
+            validationDetails: JSON.stringify(validation.breakdown),
+            status: 'APPROVED'
+          }
+        });
+      } else {
+        await prisma.dataApprovalQueue.create({
+          data: {
+            dataType: 'KPI',
+            source: validation.metadata.source,
+            extractedAt: validation.metadata.extractedAt,
+            payload: JSON.stringify(kpi),
+            validationScore: validation.finalScore,
+            validationDetails: JSON.stringify(validation.breakdown),
+            status: 'PENDING'
+          }
+        });
+      }
     }
 
     // --- Update Chart Data ---
@@ -129,11 +169,51 @@ export async function syncFredData() {
       value: d.value,
     }));
 
-    // Insert in batches since 3000 rows might be large for a single transaction depending on SQLite limits
-    const batchSize = 500;
-    for (let i = 0; i < chartDataToInsert.length; i += batchSize) {
-      const batch = chartDataToInsert.slice(i, i + batchSize);
-      await prisma.chartData.createMany({ data: batch });
+    // Validate the entire ChartData payload at once
+    const chartValidation = validator.validate({
+      source: 'FRED',
+      dataType: 'ChartData',
+      payload: chartDataToInsert
+    });
+
+    if (chartValidation.isAutoApproved) {
+      const chartDataWithMetadata = chartDataToInsert.map((d: any) => ({
+        ...d,
+        source: chartValidation.metadata.source,
+        extractedAt: chartValidation.metadata.extractedAt,
+        validationScore: chartValidation.finalScore
+      }));
+
+      // Insert in batches since 3000 rows might be large
+      const batchSize = 500;
+      for (let i = 0; i < chartDataWithMetadata.length; i += batchSize) {
+        const batch = chartDataWithMetadata.slice(i, i + batchSize);
+        await prisma.chartData.createMany({ data: batch });
+      }
+
+      await prisma.dataApprovalQueue.create({
+        data: {
+          dataType: 'ChartData',
+          source: chartValidation.metadata.source,
+          extractedAt: chartValidation.metadata.extractedAt,
+          payload: JSON.stringify(chartDataToInsert),
+          validationScore: chartValidation.finalScore,
+          validationDetails: JSON.stringify(chartValidation.breakdown),
+          status: 'APPROVED'
+        }
+      });
+    } else {
+      await prisma.dataApprovalQueue.create({
+        data: {
+          dataType: 'ChartData',
+          source: chartValidation.metadata.source,
+          extractedAt: chartValidation.metadata.extractedAt,
+          payload: JSON.stringify(chartDataToInsert),
+          validationScore: chartValidation.finalScore,
+          validationDetails: JSON.stringify(chartValidation.breakdown),
+          status: 'PENDING'
+        }
+      });
     }
 
     console.log('FRED data synchronization completed successfully.');

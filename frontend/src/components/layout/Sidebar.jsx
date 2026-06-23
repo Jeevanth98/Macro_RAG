@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Zap,
   ArrowRight,
+  ShieldCheck,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -31,6 +32,7 @@ const navItems = [
   { to: '/simulation', icon: Activity, label: 'Simulation' },
   { to: '/reports', icon: FileText, label: 'Reports' },
   { to: '/data-library', icon: Database, label: 'Data Library' },
+  { to: '/approvals', icon: ShieldCheck, label: 'Data Approvals' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

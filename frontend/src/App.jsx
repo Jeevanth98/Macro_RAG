@@ -13,6 +13,7 @@ import SimulationPage from './pages/SimulationPage/SimulationPage';
 import CalendarPage from './pages/CalendarPage/CalendarPage';
 import ReportsPage from './pages/ReportsPage/ReportsPage';
 import DataLibraryPage from './pages/DataLibraryPage/DataLibraryPage';
+import ApprovalsPage from './pages/ApprovalsPage/ApprovalsPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/calendar" element={<AppLayout><CalendarPage /></AppLayout>} />
         <Route path="/reports" element={<AppLayout><ReportsPage /></AppLayout>} />
         <Route path="/data-library" element={<AppLayout><DataLibraryPage /></AppLayout>} />
+        <Route path="/approvals" element={<AppLayout><ApprovalsPage /></AppLayout>} />
         <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
 
         {/* Default redirect */}
