@@ -1,0 +1,147 @@
+.confidence-display {
+  margin-top: 10px;
+  background-color: var(--bg-secondary, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.confidence-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.conf--high {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.conf--medium {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.conf--low {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.confidence-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.confidence-toggle-btn:hover {
+  color: var(--text-primary, #f8fafc);
+}
+
+.confidence-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color, #334155);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confidence-reason {
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  line-height: 1.5;
+}
+
+.confidence-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confidence-metric {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.metric-label {
+  width: 110px;
+  color: var(--text-muted, #94a3b8);
+  white-space: nowrap;
+}
+
+.metric-bar-container {
+  flex: 1;
+  height: 6px;
+  background-color: var(--bg-primary, #0f172a);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.metric-value {
+  width: 32px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary, #f8fafc);
+}
+
+.bg-primary {
+  background-color: #3b82f6;
+}
+
+.bg-success {
+  background-color: #10b981;
+}
+
+.bg-info {
+  background-color: #06b6d4;
+}
+
+.bg-warning {
+  background-color: #f59e0b;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

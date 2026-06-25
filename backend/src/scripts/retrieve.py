@@ -155,13 +155,31 @@ def main():
     # Process vector ranks
     for rank, doc in enumerate(vector_results):
         doc_id = doc["id"]
-        doc_registry[doc_id] = doc
+        if doc_id not in doc_registry:
+            doc_registry[doc_id] = {
+                "id": doc["id"],
+                "text": doc["text"],
+                "metadata": doc["metadata"],
+                "vector_score": doc["score"],
+                "bm25_score": None
+            }
+        else:
+            doc_registry[doc_id]["vector_score"] = doc["score"]
         rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (k + rank + 1))
         
     # Process BM25 ranks
     for rank, doc in enumerate(bm25_results):
         doc_id = doc["id"]
-        doc_registry[doc_id] = doc
+        if doc_id not in doc_registry:
+            doc_registry[doc_id] = {
+                "id": doc["id"],
+                "text": doc["text"],
+                "metadata": doc["metadata"],
+                "vector_score": None,
+                "bm25_score": doc["score"]
+            }
+        else:
+            doc_registry[doc_id]["bm25_score"] = doc["score"]
         rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (k + rank + 1))
 
     # Sort final documents by RRF score descending
@@ -175,14 +193,18 @@ def main():
             "id": doc["id"],
             "text": doc["text"],
             "metadata": doc["metadata"],
-            "rrf_score": rrf_score
+            "rrf_score": rrf_score,
+            "vector_score": doc["vector_score"],
+            "bm25_score": doc["bm25_score"]
         })
 
     # Print final JSON output
     print(json.dumps({
         "vector_success": vector_success,
         "bm25_success": bm25_success,
-        "results": final_results
+        "results": final_results,
+        "vector_results": vector_results,
+        "bm25_results": bm25_results
     }))
 
 if __name__ == "__main__":

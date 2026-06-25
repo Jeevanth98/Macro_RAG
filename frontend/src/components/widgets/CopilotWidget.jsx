@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Send, ArrowRight } from 'lucide-react';
+import ConfidenceDisplay from '../common/ConfidenceDisplay';
 import './CopilotWidget.css';
 
 export default function CopilotWidget({ onAsk, className = '' }) {
@@ -73,6 +74,9 @@ export default function CopilotWidget({ onAsk, className = '' }) {
                   <span key={i} className="copilot-widget__source-tag">{s}</span>
                 ))}
               </div>
+            )}
+            {response.confidence && (
+              <ConfidenceDisplay confidence={response.confidence} />
             )}
           </div>
         )}

@@ -17,12 +17,16 @@ export interface RetrievedChunk {
     chunk_index: number;
   };
   rrf_score?: number;
+  vector_score?: number | null;
+  bm25_score?: number | null;
 }
 
 export interface RetrievalResult {
   vector_success: boolean;
   bm25_success: boolean;
   results: RetrievedChunk[];
+  vector_results?: any[];
+  bm25_results?: any[];
   error?: string;
 }
 
@@ -37,6 +41,16 @@ export class RetrievalService {
       const scriptPath = path.resolve(__dirname, '../scripts/retrieve.py');
       const pythonProcess = spawn('python', [scriptPath, query]);
       
+      pythonProcess.on('error', (err) => {
+        console.error(`[RetrievalService] Failed to spawn python process:`, err);
+        langsmithService.traceError(runId, err);
+        resolve({
+          vector_success: false,
+          bm25_success: false,
+          results: [],
+          error: `Failed to spawn python process: ${err.message}`
+        });
+      });
       let stdoutData = '';
       let stderrData = '';
       

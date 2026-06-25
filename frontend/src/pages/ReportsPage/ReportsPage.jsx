@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Sparkles, Download, X, Printer } from 'lucide-react';
 import { api } from '../../services/api';
+import ConfidenceDisplay from '../../components/common/ConfidenceDisplay';
 import './ReportsPage.css';
 
 const REPORTS = [
@@ -165,6 +166,11 @@ export default function ReportsPage() {
                 <h1>{selectedReport.title}</h1>
                 <p>Hexaware Global Macro Intelligence</p>
                 <p className="report-date">{selectedReport.date}</p>
+                {selectedReport.confidence && (
+                  <div style={{ maxWidth: 400, margin: '20px auto 0 auto', textAlign: 'left' }} className="print-hide">
+                    <ConfidenceDisplay confidence={selectedReport.confidence} />
+                  </div>
+                )}
               </div>
               <div className="report-body" dangerouslySetInnerHTML={{ __html: selectedReport.content }} />
             </div>

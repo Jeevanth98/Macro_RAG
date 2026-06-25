@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Bot, User, History, Sparkles, Trash2, BarChart2 } from 'lucide-react';
+import ConfidenceDisplay from '../../components/common/ConfidenceDisplay';
 import './CopilotPage.css';
 
 export default function CopilotPage() {
@@ -53,7 +54,7 @@ export default function CopilotPage() {
       setMessages(prev => {
         const newMsg = [...prev];
         newMsg.pop(); // remove loading message
-        newMsg.push({ role: 'ai', content: res.text, sources: res.sources, liveDataUsed: res.liveDataUsed });
+        newMsg.push({ role: 'ai', content: res.text, sources: res.sources, liveDataUsed: res.liveDataUsed, confidence: res.confidence });
         return newMsg;
       });
     } catch (e) {
@@ -114,6 +115,9 @@ export default function CopilotPage() {
                   <div className="mt-2" style={{ display: 'flex', gap: 8 }}>
                     <span className="badge" style={{ fontSize: 11, backgroundColor: '#12B981', color: 'white', padding: '2px 8px', borderRadius: '4px', fontWeight: '500' }}>Live Economic Indicators</span>
                   </div>
+                )}
+                {msg.role === 'ai' && msg.confidence && (
+                  <ConfidenceDisplay confidence={msg.confidence} />
                 )}
               </div>
             </div>

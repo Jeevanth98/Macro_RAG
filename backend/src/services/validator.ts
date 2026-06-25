@@ -211,4 +211,50 @@ export class DataValidator {
       reason: warnings.length > 0 ? warnings.join('; ') : 'Values within acceptable historical/logical ranges' 
     };
   }
+
+  /**
+   * Validates LLM generated response against retrieved evidence and LLM assessment diagnostics.
+   * Returns a Validation Score between 0 and 100.
+   */
+  public validateAIResponse(
+    text: string,
+    sources: string[],
+    retrievedChunks: any[],
+    assessment: {
+      context_sufficient: boolean;
+      unsupported_claims: number;
+      conflicting_sources: boolean;
+      assumptions_made: number;
+      answer_quality: number;
+    }
+  ): number {
+    let score = 100;
+
+    // Deduct for unsupported claims
+    if (assessment.unsupported_claims > 0) {
+      score -= Math.min(50, assessment.unsupported_claims * 15);
+    }
+
+    // Deduct for conflicting sources
+    if (assessment.conflicting_sources) {
+      score -= 20;
+    }
+
+    // Deduct if context was not sufficient but response generated claims
+    if (!assessment.context_sufficient) {
+      score -= 15;
+    }
+
+    // Deduct if too many assumptions were made
+    if (assessment.assumptions_made > 0) {
+      score -= Math.min(20, assessment.assumptions_made * 5);
+    }
+
+    // Check for missing citations if context chunks exist but no sources cited
+    if (retrievedChunks.length > 0 && sources.length === 0) {
+      score -= 15;
+    }
+
+    return Math.max(0, Math.min(100, score));
+  }
 }
