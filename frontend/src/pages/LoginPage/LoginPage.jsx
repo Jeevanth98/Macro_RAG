@@ -10,13 +10,16 @@ import {
   Brain,
   Globe2,
   Sun,
+  Moon,
   ChevronDown,
   Building2,
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import './LoginPage.css';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -283,8 +286,8 @@ export default function LoginPage() {
       {/* ── Right Section ────────────────────────────────────────────── */}
       <div className="login-right">
         <div className="login-right__top">
-          <button className="login-theme-btn" title="Toggle theme">
-            <Sun size={20} />
+          <button className="login-theme-btn" onClick={toggleTheme} title="Toggle theme">
+            {theme === 'classic' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
           <button className="login-lang-btn">
             <Globe2 size={16} />

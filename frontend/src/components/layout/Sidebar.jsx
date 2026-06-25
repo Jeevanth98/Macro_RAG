@@ -18,6 +18,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Gauge,
+  Lightbulb,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -35,6 +36,7 @@ const navItems = [
   { to: '/reports', icon: FileText, label: 'Reports' },
   { to: '/data-library', icon: Database, label: 'Data Library' },
   { to: '/approvals', icon: ShieldCheck, label: 'Data Approvals' },
+  { to: '/innovation-exchange', icon: Lightbulb, label: 'Innovation Exchange' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 

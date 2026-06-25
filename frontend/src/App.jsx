@@ -16,42 +16,44 @@ import DataLibraryPage from './pages/DataLibraryPage/DataLibraryPage';
 import ApprovalsPage from './pages/ApprovalsPage/ApprovalsPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import QualityCenterPage from './pages/QualityCenterPage/QualityCenterPage';
+import InnovationExchangePage from './pages/InnovationExchangePage/InnovationExchangePage';
 import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   return (
     <ThemeProvider>
       <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Authenticated routes (wrapped with AppLayout) */}
-        <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
-        
-        {/* Phase 2 Pages */}
-        <Route path="/global-overview" element={<AppLayout><GlobalOverviewPage /></AppLayout>} />
-        <Route path="/indicators" element={<AppLayout><IndicatorsPage /></AppLayout>} />
-        <Route path="/countries" element={<AppLayout><CountriesPage /></AppLayout>} />
-        
-        {/* Phase 3 Pages */}
-        <Route path="/copilot" element={<AppLayout><CopilotPage /></AppLayout>} />
-        <Route path="/quality-center" element={<AppLayout><QualityCenterPage /></AppLayout>} />
-        <Route path="/watchlist" element={<AppLayout><WatchlistPage /></AppLayout>} />
-        
-        {/* Phase 4 & 5 Pages */}
-        <Route path="/screeners" element={<AppLayout><ScreenersPage /></AppLayout>} />
-        <Route path="/simulation" element={<AppLayout><SimulationPage /></AppLayout>} />
-        <Route path="/calendar" element={<AppLayout><CalendarPage /></AppLayout>} />
-        <Route path="/reports" element={<AppLayout><ReportsPage /></AppLayout>} />
-        <Route path="/data-library" element={<AppLayout><DataLibraryPage /></AppLayout>} />
-        <Route path="/approvals" element={<AppLayout><ApprovalsPage /></AppLayout>} />
-        <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
+          {/* Authenticated routes (wrapped with AppLayout) */}
+          <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
+          
+          {/* Phase 2 Pages */}
+          <Route path="/global-overview" element={<AppLayout><GlobalOverviewPage /></AppLayout>} />
+          <Route path="/indicators" element={<AppLayout><IndicatorsPage /></AppLayout>} />
+          <Route path="/countries" element={<AppLayout><CountriesPage /></AppLayout>} />
+          
+          {/* Phase 3 Pages */}
+          <Route path="/copilot" element={<AppLayout><CopilotPage /></AppLayout>} />
+          <Route path="/quality-center" element={<AppLayout><QualityCenterPage /></AppLayout>} />
+          <Route path="/watchlist" element={<AppLayout><WatchlistPage /></AppLayout>} />
+          
+          {/* Phase 4 & 5 Pages */}
+          <Route path="/screeners" element={<AppLayout><ScreenersPage /></AppLayout>} />
+          <Route path="/simulation" element={<AppLayout><SimulationPage /></AppLayout>} />
+          <Route path="/calendar" element={<AppLayout><CalendarPage /></AppLayout>} />
+          <Route path="/reports" element={<AppLayout><ReportsPage /></AppLayout>} />
+          <Route path="/data-library" element={<AppLayout><DataLibraryPage /></AppLayout>} />
+          <Route path="/approvals" element={<AppLayout><ApprovalsPage /></AppLayout>} />
+          <Route path="/settings" element={<AppLayout><SettingsPage /></AppLayout>} />
+          <Route path="/innovation-exchange" element={<AppLayout><InnovationExchangePage /></AppLayout>} />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
       </Router>
     </ThemeProvider>
   );
