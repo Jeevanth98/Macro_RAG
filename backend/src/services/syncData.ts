@@ -2,12 +2,14 @@ import { PrismaClient } from '@prisma/client';
 import { fetchFredSeries } from './fredService';
 import { DataValidator } from './validator';
 import 'dotenv/config';
+import { langsmithService } from './observability/langsmith';
 
 const prisma = new PrismaClient();
 const validator = new DataValidator();
 
 export async function syncFredData() {
   console.log('Starting FRED data synchronization...');
+  const runId = langsmithService.traceStart('FRED Ingestion Sync', { timestamp: new Date().toISOString() });
 
   try {
     const gdpData = await fetchFredSeries('A191RL1Q225SBEA', 12);
@@ -24,7 +26,7 @@ export async function syncFredData() {
 
     await prisma.kpi.deleteMany();
 
-    const kpisToInsert = [];
+    const kpisToInsert: any[] = [];
 
     const getTrend = (current: number, previous: number) => {
       if (current > previous) return 'up';
@@ -217,8 +219,10 @@ export async function syncFredData() {
     }
 
     console.log('FRED data synchronization completed successfully.');
+    langsmithService.traceSuccess(runId, { status: 'success' });
   } catch (error) {
     console.error('Failed to sync FRED data:', error);
+    langsmithService.traceError(runId, error);
   } finally {
     await prisma.$disconnect();
   }

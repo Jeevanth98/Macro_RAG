@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { langsmithService } from './observability/langsmith';
 
 // Define the interface for data to be validated
 export interface IncomingData {
@@ -34,41 +35,57 @@ export class DataValidator {
   };
 
   public validate(data: IncomingData): ValidationResult {
-    const breakdown: Record<string, ValidationLayerResult> = {};
-    
-    // 1. Source Validation
-    breakdown.source = this.validateSource(data.source);
-    
-    // 2. Data Format
-    breakdown.format = this.validateFormat(data.payload);
-    
-    // 3. Data Quality
-    breakdown.quality = this.validateQuality(data.payload);
-    
-    // 4. Range Validation
-    breakdown.range = this.validateRange(data.dataType, data.payload);
+    const runId = langsmithService.traceStart('Data Validation Layer', { source: data.source, dataType: data.dataType });
 
-    // Calculate final weighted score
-    let totalScore = 0;
-    let totalWeight = 0;
+    try {
+      const breakdown: Record<string, ValidationLayerResult> = {};
+      
+      // 1. Source Validation
+      breakdown.source = this.validateSource(data.source);
+      
+      // 2. Data Format
+      breakdown.format = this.validateFormat(data.payload);
+      
+      // 3. Data Quality
+      breakdown.quality = this.validateQuality(data.payload);
+      
+      // 4. Range Validation
+      breakdown.range = this.validateRange(data.dataType, data.payload);
 
-    for (const [layer, result] of Object.entries(breakdown)) {
-      totalScore += result.score * result.weight;
-      totalWeight += result.weight;
-    }
+      // Calculate final weighted score
+      let totalScore = 0;
+      let totalWeight = 0;
 
-    const finalScore = totalWeight > 0 ? (totalScore / totalWeight) : 0;
-    const isAutoApproved = finalScore > 80;
-
-    return {
-      finalScore: parseFloat(finalScore.toFixed(2)),
-      isAutoApproved,
-      breakdown,
-      metadata: {
-        source: data.source,
-        extractedAt: new Date(), // Capture exact extraction/validation time
+      for (const [layer, result] of Object.entries(breakdown)) {
+        totalScore += result.score * result.weight;
+        totalWeight += result.weight;
       }
-    };
+
+      const finalScore = totalWeight > 0 ? (totalScore / totalWeight) : 0;
+      const isAutoApproved = finalScore > 80;
+
+      const resultPayload = {
+        finalScore: parseFloat(finalScore.toFixed(2)),
+        isAutoApproved,
+        breakdown,
+        metadata: {
+          source: data.source,
+          extractedAt: new Date(), // Capture exact extraction/validation time
+        }
+      };
+
+      langsmithService.traceSuccess(runId, resultPayload);
+      return resultPayload;
+    } catch (error) {
+      langsmithService.traceError(runId, error);
+      // Fail-safe default payload if validation logic crashes to prevent app failures
+      return {
+        finalScore: 0,
+        isAutoApproved: false,
+        breakdown: {},
+        metadata: { source: data.source, extractedAt: new Date() }
+      };
+    }
   }
 
   private validateSource(source: string): ValidationLayerResult {

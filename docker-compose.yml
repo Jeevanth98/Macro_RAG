@@ -1,6 +1,4 @@
 # docker-compose.yml
-version: '3.8'
-
 services:
   neo4j:
     image: neo4j:5
@@ -16,25 +14,39 @@ services:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
-  app:
-    build: .
-    container_name: economic_graphrag_app
-    depends_on:
-      - neo4j
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: macro_rag_backend
     ports:
-      - "8501:8501" # Streamlit default port
+      - "8000:8000"
     env_file:
       - .env
     environment:
+      - DATABASE_URL=file:./dev.db
       - NEO4J_URI=bolt://neo4j:7687
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: macro_rag_frontend
+    ports:
+      - "5173:5173"
     volumes:
-      - ./economic_graphrag:/app/economic_graphrag
-      - ./data:/app/data
-    command: streamlit run economic_graphrag/ui/streamlit_app.py
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   neo4j_data:

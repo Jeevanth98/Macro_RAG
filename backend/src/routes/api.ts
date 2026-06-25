@@ -3,7 +3,8 @@ import { PrismaClient } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { langsmithService } from '../services/observability/langsmith';
 
 // Dashboard Endpoints
 router.get('/dashboard/kpis', async (req, res) => {
@@ -118,20 +119,19 @@ router.post('/copilot/ask', async (req, res) => {
     res.status(400).json({ error: 'Query is required' });
     return;
   }
+
+  const runId = langsmithService.traceStart('Gemini Copilot', { query, mode });
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
+    let resultJson;
     if (mode === 'summary') {
       const prompt = `Provide a brief summary of the macroeconomic implications of: "${query}". Keep it to 2-3 sentences. Do not use any markdown formatting like ** or ##. Return your response strictly as a valid JSON object in this format: {"text": "summary text...", "sources": ["Source 1"]}`;
       const result = await model.generateContent(prompt);
       const rawText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-      const resJson = JSON.parse(rawText);
-      res.json({
-        text: resJson.text,
-        sources: resJson.sources
-      });
+      resultJson = JSON.parse(rawText);
     } else {
       const prompt = `Provide a comprehensive macroeconomic analysis for: "${query}". 
       Respond ONLY in plain text without any markdown formatting like **, ##. Use clean paragraphs and standard dashes for lists.
@@ -142,24 +142,36 @@ router.post('/copilot/ask', async (req, res) => {
       }`;
       const result = await model.generateContent(prompt);
       const rawText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-      const resJson = JSON.parse(rawText);
-      res.json({
-        text: resJson.text,
-        sources: resJson.sources
-      });
+      resultJson = JSON.parse(rawText);
     }
+
+    langsmithService.traceSuccess(runId, resultJson);
+
+    res.json({
+      text: resultJson.text,
+      sources: resultJson.sources
+    });
   } catch (err) {
     console.error('Gemini error:', err);
+    langsmithService.traceError(runId, err);
     res.status(500).json({ error: 'Failed to fetch from Gemini' });
   }
 });
 
 // Report Generation Endpoint
 router.post('/report/generate', async (req, res) => {
+  const { topic, includeCitations, includeCharts, includeTable, includeSummary } = req.body;
+  const reportTopic = topic || "Global Macroeconomic Outlook";
+  
+  const runId = langsmithService.traceStart('Report Generation', {
+    topic: reportTopic,
+    includeCitations,
+    includeCharts,
+    includeTable,
+    includeSummary
+  });
+
   try {
-    const { topic, includeCitations, includeCharts, includeTable, includeSummary } = req.body;
-    const reportTopic = topic || "Global Macroeconomic Outlook";
-    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
@@ -175,14 +187,19 @@ router.post('/report/generate', async (req, res) => {
     let htmlContent = result.response.text();
     htmlContent = htmlContent.replace(/```html/g, '').replace(/```/g, '');
     
-    res.json({
+    const responsePayload = {
       title: 'AI Generated Custom Macro Report',
       type: 'Custom Analysis',
       date: new Date().toLocaleDateString(),
       content: htmlContent
-    });
+    };
+
+    langsmithService.traceSuccess(runId, responsePayload);
+
+    res.json(responsePayload);
   } catch (err) {
     console.error('Gemini error:', err);
+    langsmithService.traceError(runId, err);
     res.status(500).json({ error: 'Failed to generate report' });
   }
 });
@@ -226,7 +243,7 @@ router.get('/data/indicators', (req, res) => {
 // Generic data series endpoint for Global Overview charts
 router.get('/data/series/:country/:indicator', async (req, res) => {
   const { country, indicator } = req.params;
-  const data = [];
+  const data: any[] = [];
   
   // Baseline configuration mapping specific structural events to years
   const isCovidYear = (y: number) => y === 2020;
