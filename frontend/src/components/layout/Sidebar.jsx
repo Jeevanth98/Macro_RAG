@@ -17,6 +17,7 @@ import {
   Zap,
   ArrowRight,
   ShieldCheck,
+  Gauge,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -27,6 +28,7 @@ const navItems = [
   { to: '/countries', icon: MapPin, label: 'Countries' },
   { to: '/watchlist', icon: Bookmark, label: 'Watchlist' },
   { to: '/copilot', icon: Sparkles, label: 'AI Copilot' },
+  { to: '/quality-center', icon: Gauge, label: 'AI Quality Center' },
   { to: '/screeners', icon: SlidersHorizontal, label: 'Screeners' },
   { to: '/calendar', icon: CalendarDays, label: 'Calendar' },
   { to: '/simulation', icon: Activity, label: 'Simulation' },

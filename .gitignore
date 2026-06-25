@@ -33,3 +33,9 @@ backend/prisma/dev.db
 # Local knowledge base PDFs
 knowledge_base/Global/
 knowledge_base/India/
+
+# Database
+backend/prisma/dev.db
+
+# ChromaDB
+data/chroma_db/

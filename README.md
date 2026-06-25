@@ -4,129 +4,90 @@ An enterprise-grade, full-stack macroeconomic analysis platform, risk simulation
 
 ---
 
-## 🚀 Key Features
+### 🚀 Key Features
 
-### 1. Executive Dashboard & Visualizations
-*   **KPI Tracking**: Real-time economic indicators (GDP Growth, Core CPI, Unemployment, Fed Funds Rate, Consumer Sentiment, Nonfarm Payrolls) with interactive trend badges and sparklines.
-*   **Dynamic World Heatmap**: A custom-drawn global visualization (using React Simple Maps) to represent GDP, Inflation, and Unemployment across the G20.
-*   **Asset Yield Curves**: Interactive visualization of the United States Treasury Yield Curve (comparing current rates with 1 month ago).
-*   **Watchlist Management**: Add and track targeted indicators/countries, with capabilities to configure alert thresholds.
+*   **Executive Dashboard**: Real-time G20 indicator tracking (GDP, CPI, Unemployment) with dynamic geospatial world heatmaps, US Treasury yield curves, and interactive alert watchlist configurations.
+*   **Macro Copilot**: Advanced chat assistant powered by **Gemini 2.5 Flash** with dense (ChromaDB) and sparse (BM25) search fusion, summaries, detailed analyses, and live indicators attribution.
+*   **Enterprise Confidence Engine**: Every AI-generated response includes a dynamic, backend-calculated confidence score (High/Medium/Low) based on RAG retrieval scores, citation coverage, source credibility, and LLM logical checks, supporting graceful weighting adaptation for RAG and non-RAG pipelines.
+*   **AI Quality Center**: An executive evaluation dashboard displaying RAGAS and TruLens benchmark metrics, datasets parameters, and historical evaluation runs to transparently showcase system reliability.
+*   **RAGAS Benchmark Evaluation**: Built-in support for measuring RAG quality using metrics like **Faithfulness**, **Answer Relevancy**, **Context Precision**, and **Context Recall**.
+*   **TruLens Triad Evaluation**: Measures pipeline fidelity through **Groundedness**, **Answer Relevance**, and **Context Relevance** checks, alongside token costs and latency metrics.
+*   **Risk Simulation Lab**: Adjust economic levers (GDP growth, policy interest rates, inflation) to generate probabilistic economic scenarios (stagflation, overheating, recession) with structural trade-offs.
+*   **Custom Report Generator**: Auto-drafts publication-ready reviews with CSS-styled charts, data summaries, and bibliographic records.
+*   **Multi-Layered Validation Engine**: Multi-weighted data checks (Source, Format, Quality, and Range) to automatically approve clean data or route anomalies to an admin review queue.
+*   **Human-in-the-loop Validation**: Dedicated administrative dashboard displaying flagged anomalous data synchronization payloads with full approve/reject capability.
+*   **LangSmith Observability**: Complete nesting tracing for retrieval-to-generation chains, operating with production-safe fallback when tracing is disabled.
 
-### 2. Macro Copilot (Hybrid RAG Conversational Assistant)
-*   An AI assistant powered by **Gemini 2.5 Flash** integrated with a **Hybrid Retrieval-Augmented Generation (RAG)** architecture.
-*   **Hybrid Retrieval**: Combines dense vector search (ChromaDB) and sparse keyword retrieval (BM25) using **Reciprocal Rank Fusion (RRF)** to retrieve context from G20 macroeconomic reports before generating responses.
-*   **Summary Mode**: Delivers quick, concise 2-3 sentence summaries backed by retrieved documents.
-*   **Detailed Mode**: Yields comprehensive analytical papers with real-world source citations.
-*   **Sources & Badges**: Dynamically displays a list of "Sources Used" and a "Live Economic Indicators" badge when FRED data is utilized.
+---
 
-### 3. PDF Ingestion & Knowledge Base
-*   Curated repository of official macroeconomic PDF reports (e.g. IMF World Economic Outlook, World Bank Global Economic Prospects, OECD Economic Outlook, RBI Annual Report, Economic Survey of India).
-*   **Ingestion Pipeline**: Recursively scans, extracts text, chunks (size 800, overlap 150), embeds (`BAAI/bge-small-en-v1.5`), and indexes files into ChromaDB.
-*   Rebuilds vector stores manually on command.
+## 🏗️ Updated AI Architecture Flow
 
-### 4. Retrieval Pipeline Architecture
+The evaluation, validation, and observability services form a first-class loop inside the G20 intelligence platform:
+
 ```
-User Question
-      │
-      ▼
-Question Router ──► (LIVE_DATA / BOTH) ──► SQLite/FRED KPI Retrieval
-      │
-      ▼ (DOCUMENT_RETRIEVAL / BOTH)
-BM25 Keyword Search  +  ChromaDB Vector Search (BAAI/bge-small-en-v1.5)
-      │                       │
-      └───────────┬───────────┘
-                  ▼
-     Reciprocal Rank Fusion (RRF)
-                  │
-                  ▼ (Top 5 Chunks)
-           Prompt Builder
-                  │
-                  ▼
-                Gemini
-                  │
-                  ▼
-        Response with Sources
+    User Query
+        │
+        ▼
+  Question Router
+        │
+        ├──► [LIVE_DATA / BOTH] ───────► FRED SQLite KPI Retrieval
+        │
+        └──► [DOCUMENT_RETRIEVAL / BOTH]
+                     │
+                     ▼
+        Hybrid Retrieval (ChromaDB + BM25)
+                     │
+                     ▼
+           Reciprocal Rank Fusion (RRF)
+                     │
+                     ▼
+               Prompt Builder
+                     │
+                     ▼
+                   Gemini
+                     │
+                     ▼
+             Confidence Engine ◄─────── LangSmith Observability
+                     │
+                     ▼
+                API Response
+                     │
+                     ▼
+             AI Quality Center (RAGAS + TruLens Benchmarks)
 ```
-
-### 5. LangSmith Observability
-*   Traces complete macroeconomic request lifecycles including inputs, outputs, latency, errors, and metadata.
-*   Presents each stage as nested child spans (`Question Router`, `Vector/BM25 Search`, `RRF Fusion`, `FRED Retrieval`, `Gemini Request`).
-*   **Production-Safe**: Tracing is optional. If disabled (`LANGSMITH_ENABLED=false`) or the API key is absent, the application bypasses tracing gracefully without throwing exceptions or interrupting user requests.
-
-### 3. Risk Simulation Lab
-*   Stress-test sovereign economies by adjusting critical inputs: GDP growth, inflation, unemployment, and policy interest rates.
-*   Uses built-in heuristic models to generate detailed macroeconomic assessments (Stagflation, Recession/Deflation, Goldilocks, Overheating).
-*   Displays optimistic, pessimistic, and most probable scenarios, highlighting structural pros and cons.
-
-### 4. Custom Report Generator
-*   A form-driven report architect that drafts publication-ready economic reviews.
-*   Dynamically calls the Gemini API to produce clean HTML reports including executive summaries, custom CSS-styled data tables, embedded bar charts, and citations.
-
-### 5. Automated Data Sync & FRED Pipeline
-*   Integrated service connecting to the **Federal Reserve Economic Data (FRED) API** to fetch observations for critical economic indicators.
-*   Runs automated mapping on series IDs like `A191RL1Q225SBEA` (Real GDP), `CPILFESL` (Core CPI), `UNRATE` (Unemployment), and `DGS10` (10-Year Treasury Yields).
-
-### 6. Multi-Layered Validation Engine
-Every incoming data series is evaluated through a weighted four-layer validation mechanism before storage:
-*   **Source Validation (20% weight)**: Grades the credibility of the data provider (e.g., official agencies vs external scrapers).
-*   **Format Validation (30% weight)**: Ensures payload structures match strict criteria.
-*   **Quality Validation (25% weight)**: Identifies missing entries, null parameters, or NaN values.
-*   **Range Validation (25% weight)**: Applies boundary filters to detect anomalous spikes or outlier percentage changes.
-*   *Auto-Approval*: Data scoring above 80/100 is merged directly into production; all other entries are routed to the review queue.
-
-### 7. Human-in-the-Loop Approval Queue
-*   A dedicated administrative dashboard displaying all data sync runs flagged as anomalous (validation score <= 80).
-*   Shows itemized score cards, details, and warnings for format/range/quality mismatches.
-*   Gives administrators full control to either **Approve** (merge to SQLite production) or **Reject** (discard from queue).
-
-### 8. Python Analytics & Insights Engine (`economic_graphrag`)
-*   Located in `economic_graphrag/analytics/insights.py`, this module provides:
-    *   **Outlier Detection**: Identifies countries with values >2σ from the G20 mean.
-    *   **Trend Reversals**: Flags critical direction changes in 3-year rolling average slopes.
-    *   **Record Proximities**: Tracks metrics near historic highs/lows since 2000.
-    *   **Economic Strength Scoring**: Computes a composite 0-100 rating based on growth, inflation, and labor conditions.
-    *   **Regime Classification**: Classifies economies into cyclical phases (Expansion, Late Cycle, Stagflation, Recession, Slowdown, Recovery).
 
 ---
 
 ## 🛠️ Technology Stack
 
-*   **Frontend**: React (Vite SPA), Vanilla CSS, Lucide React, Recharts (Charts), React Simple Maps / D3 (Geospatial maps).
+*   **Frontend**: React (Vite SPA), Vanilla CSS, Lucide React, Recharts, React Simple Maps.
 *   **Backend**: Node.js, Express, TypeScript, Prisma ORM, SQLite.
-*   **Generative AI**: Google Generative AI SDK (Gemini models), LangChain, LangSmith, ChromaDB, BM25, Reciprocal Rank Fusion (RRF).
+*   **Generative AI**: Google Generative AI SDK, LangChain.
+*   **Retrieval**: Hybrid RAG, BM25, ChromaDB (embedding: `BAAI/bge-small-en-v1.5`), Reciprocal Rank Fusion (RRF).
+*   **Evaluation**: RAGAS, TruLens.
+*   **Observability**: LangSmith.
 *   **Analytics**: Python (Pandas, NumPy).
-*   **Containerization**: Docker, Docker Compose (orchestrating Python/Streamlit & Neo4j database containers).
+*   **Containerization**: Docker, Docker Compose (Node backend, React frontend, Neo4j graph db).
 
 ---
 
-## 📦 Project Architecture
+## 💎 Enterprise AI Engineering Features
 
-```
-Frontend (React) ◄──► Express Backend ◄──► Question Router
-                             │
-                             ├─► BM25 + ChromaDB (retrieve.py) ─► RRF ─► Prompt Builder ─► Gemini
-                             │
-                             └─► LangSmith (observability spans)
-```
+*   **Retrieval-Augmented Generation**: Dual-retriever strategy with RRF rank alignment.
+*   **Confidence Scoring**: Real-time composite scoring and re-normalization for varying pipeline signals.
+*   **AI Evaluation Dashboard**: Consolidated dashboard for RAGAS & TruLens performance transparency.
+*   **Benchmark Dataset Support**: Structured QA reference datasets to run systematic evaluations.
+*   **AI Quality Monitoring**: Persistent storage of historical metrics to track regressions and improvements.
+*   **Source Attribution**: Document matching and live FRED economic indicators integration.
+*   **Production-Oriented Architecture**: Decoupled TS services, sandbox-safe execution, and Docker-orchestrated containers.
 
-```
-Macro_RAG/
-├── backend/                       # Express Node.js & TypeScript Backend
-│   ├── prisma/                    # Schema definition and SQLite Seeder
-│   └── src/
-│       ├── routes/                # API and Approvals endpoints
-│       └── services/              # FRED sync, Validator, and Gemini adapters
-├── frontend/                      # React (Vite) Single Page Application
-│   ├── src/
-│   │   ├── components/            # Reusable charts, maps, and widgets
-│   │   ├── pages/                 # UI pages (Dashboard, Simulation, Copilot, Approvals, etc.)
-│   │   └── services/              # Axios/Fetch API wrapper
-├── economic_graphrag/             # Python Analytics & Graph RAG Ingestion Pipeline
-│   └── analytics/                 # Smart Insights and Scoring engine
-├── data/                          # SQLite and Chroma DB vector stores
-├── docker-compose.yml             # Local service orchestration
-└── requirements.txt               # Python package requirements
-```
+---
+
+## 📷 Screenshots
+
+### AI Quality Center Dashboard
+![AI Quality Center](file:///C:/Users/krish/.gemini/antigravity-ide/brain/db2ebf75-cdc5-4995-ba7b-21023f617e98/media__1782383215271.png)
+*The AI Quality Center displays benchmark evaluation metrics (RAGAS and TruLens), datasets characteristics, system quality status, and historical score trends.*
 
 ---
 
@@ -190,3 +151,16 @@ To populate the vector database with macroeconomic PDF reports:
     npm run dev
     ```
     Open your browser and navigate to `http://localhost:5173`.
+
+---
+
+## 🗺️ Future Roadmap
+*   **Confidence Calibration v2**: Adaptive calibration curves based on user feedback.
+*   **GraphRAG Integration**: Multi-hop retrieval using Graph databases.
+*   **Neo4j Knowledge Graph**: Mapping entities and economic dependencies.
+*   **Automated Benchmark Pipeline**: Triggering RAGAS evaluations on every pull request.
+*   **Continuous Evaluation**: Scheduling nightly benchmark suite runs.
+*   **Human Feedback Loop**: Aligning validation outputs with manual admin approvals.
+*   **Retrieval Analytics**: Tracking chunk hit-rates and context usefulness.
+*   **Prompt Versioning**: Logging prompt templates inside LangSmith prompt registry.
+*   **Evaluation Trend Analysis**: Enhanced statistical charts for history tracking.

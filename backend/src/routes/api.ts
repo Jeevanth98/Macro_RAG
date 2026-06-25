@@ -544,4 +544,25 @@ router.get('/data/series/:country/:indicator', async (req, res) => {
   res.json(data);
 });
 
+import { EvaluationService } from '../services/evaluationService';
+
+// AI Quality & Evaluation Endpoints
+router.get('/quality/evaluations', (req, res) => {
+  try {
+    const data = EvaluationService.getEvaluationData();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch evaluation results' });
+  }
+});
+
+router.post('/quality/evaluate', async (req, res) => {
+  try {
+    const data = await EvaluationService.triggerEvaluation();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to execute evaluation' });
+  }
+});
+
 export default router;

@@ -105,5 +105,17 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/approvals/${id}/reject`, { method: 'POST' });
     if (!res.ok) throw new Error('Failed to reject data');
     return res.json();
+  },
+
+  // AI Quality Center
+  getEvaluations: async () => {
+    const res = await fetch(`${API_BASE_URL}/quality/evaluations`);
+    if (!res.ok) throw new Error('Failed to fetch evaluation results');
+    return res.json();
+  },
+  runEvaluation: async () => {
+    const res = await fetch(`${API_BASE_URL}/quality/evaluate`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to run evaluations');
+    return res.json();
   }
 };

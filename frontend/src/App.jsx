@@ -15,6 +15,7 @@ import ReportsPage from './pages/ReportsPage/ReportsPage';
 import DataLibraryPage from './pages/DataLibraryPage/DataLibraryPage';
 import ApprovalsPage from './pages/ApprovalsPage/ApprovalsPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
+import QualityCenterPage from './pages/QualityCenterPage/QualityCenterPage';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         
         {/* Phase 3 Pages */}
         <Route path="/copilot" element={<AppLayout><CopilotPage /></AppLayout>} />
+        <Route path="/quality-center" element={<AppLayout><QualityCenterPage /></AppLayout>} />
         <Route path="/watchlist" element={<AppLayout><WatchlistPage /></AppLayout>} />
         
         {/* Phase 4 & 5 Pages */}
