@@ -85,14 +85,16 @@
   border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 
-/* ── Promo Card ─────────────────────────────────────────────────────────── */
-
 .sidebar__promo {
   margin: 16px 0;
   padding: 20px 16px;
   background: linear-gradient(135deg, #F0EDFF 0%, #E8E4FF 100%);
   border-radius: var(--radius-lg);
   position: relative;
+}
+
+.theme-night .sidebar__promo {
+  background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%);
 }
 
 .sidebar__promo-icon {

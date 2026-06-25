@@ -1,8 +1,11 @@
 import React from 'react';
-import { Search, Plus, Bell, HelpCircle, Settings } from 'lucide-react';
+import { Search, Plus, Bell, HelpCircle, Settings, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import './Navbar.css';
 
 export default function Navbar() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header className="navbar">
       <div className="navbar__search">
@@ -26,6 +29,14 @@ export default function Navbar() {
         <button className="navbar__icon-btn" title="Notifications">
           <Bell size={20} />
           <span className="navbar__badge">3</span>
+        </button>
+
+        <button 
+          className="navbar__icon-btn theme-toggle-btn" 
+          onClick={toggleTheme} 
+          title={theme === 'classic' ? 'Switch to Night Mode' : 'Switch to Classic Mode'}
+        >
+          {theme === 'classic' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         <button className="navbar__icon-btn" title="Help">

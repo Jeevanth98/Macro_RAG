@@ -31,8 +31,8 @@
 
   /* ── Text ───────────────────────────────────────────────────────────────── */
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-secondary: #334155; /* Darker than #475569 for improved readability */
+  --text-muted: #64748B; /* Darker than #94A3B8 for improved readability */
   --text-link: #2563EB;
   --text-link-hover: #1D4ED8;
   --text-brand: #6D5DFC;
@@ -111,6 +111,69 @@
   --z-navbar: 300;
   --z-modal: 400;
   --z-toast: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CINSIGHT — Night Theme Overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.theme-night {
+  /* ── Brand ─────────────────────────────────────────────────────────────── */
+  --brand-primary: #8B5CF6;
+  --brand-primary-light: #A78BFA;
+  --brand-primary-dark: #7C3AED;
+  --brand-gradient: linear-gradient(135deg, #7C3AED, #8B5CF6);
+  --brand-gradient-hover: linear-gradient(135deg, #6D28D9, #7C3AED);
+  --brand-glow: rgba(139, 92, 246, 0.25);
+
+  /* ── Backgrounds ───────────────────────────────────────────────────────── */
+  --bg-primary: #0F172A;
+  --bg-secondary: #111827;
+  --bg-card: #1E293B;
+  --bg-card-hover: #243048;
+  --bg-sidebar: #0F172A;
+  --bg-navbar: rgba(15, 23, 42, 0.85);
+  --bg-input: #1E293B;
+  --bg-feature-icon: rgba(124, 58, 237, 0.15);
+
+  /* ── Borders ───────────────────────────────────────────────────────────── */
+  --border-color: #334155;
+  --border-light: rgba(51, 65, 85, 0.5);
+  --border-input: #475569;
+  --border-focus: #8B5CF6;
+
+  /* ── Text ───────────────────────────────────────────────────────────────── */
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-link: #A78BFA;
+  --text-link-hover: #C084FC;
+  --text-brand: #A78BFA;
+  --text-on-brand: #FFFFFF;
+
+  /* ── Status Colors ─────────────────────────────────────────────────────── */
+  --success: #22C55E;
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success-border: rgba(34, 197, 94, 0.2);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning-border: rgba(245, 158, 11, 0.2);
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-border: rgba(239, 68, 68, 0.2);
+  --info: #3B82F6;
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --info-border: rgba(59, 130, 246, 0.2);
+
+  /* ── Shadows (Softer for dark backgrounds) ────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-brand: 0 16px 30px rgba(124, 58, 237, 0.3);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

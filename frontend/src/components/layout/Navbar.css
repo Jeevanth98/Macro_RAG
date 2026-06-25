@@ -128,3 +128,11 @@
   align-items: center;
   justify-content: center;
 }
+
+.theme-toggle-btn svg {
+  transition: transform var(--transition-normal);
+}
+
+.theme-toggle-btn:hover svg {
+  transform: rotate(20deg) scale(1.1);
+}

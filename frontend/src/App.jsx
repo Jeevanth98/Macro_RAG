@@ -16,10 +16,12 @@ import DataLibraryPage from './pages/DataLibraryPage/DataLibraryPage';
 import ApprovalsPage from './pages/ApprovalsPage/ApprovalsPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import QualityCenterPage from './pages/QualityCenterPage/QualityCenterPage';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   return (
-    <Router>
+    <ThemeProvider>
+      <Router>
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
@@ -50,6 +52,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
