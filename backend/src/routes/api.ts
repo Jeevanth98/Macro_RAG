@@ -5,6 +5,8 @@ const router = Router();
 const prisma = new PrismaClient();
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { langsmithService } from '../services/observability/langsmith';
+import { RetrievalService, RetrievedChunk } from '../services/retrievalService';
+import fs from 'fs';
 
 // Dashboard Endpoints
 router.get('/dashboard/kpis', async (req, res) => {
@@ -123,36 +125,139 @@ router.post('/copilot/ask', async (req, res) => {
   const runId = langsmithService.traceStart('Gemini Copilot', { query, mode });
   
   try {
+    // 1. Question Router
+    const routing = await RetrievalService.routeQuestion(query, runId);
+    
+    let liveDataText = '';
+    let retrievedChunks: RetrievedChunk[] = [];
+    
+    // 2. FRED / SQLite Retrieval
+    if (routing === 'LIVE_DATA' || routing === 'BOTH') {
+      const fredRun = langsmithService.traceStart('FRED Retrieval', { query }, runId);
+      try {
+        liveDataText = await RetrievalService.getLiveDataSummary();
+        langsmithService.traceSuccess(fredRun, { summary: liveDataText });
+      } catch (err) {
+        langsmithService.traceError(fredRun, err);
+      }
+    }
+    
+    // 3. Document Retrieval (Hybrid: Vector + BM25)
+    if (routing === 'DOCUMENT_RETRIEVAL' || routing === 'BOTH') {
+      const vectorRun = langsmithService.traceStart('Vector Retrieval', { query }, runId);
+      const bm25Run = langsmithService.traceStart('BM25 Retrieval', { query }, runId);
+      const rrfRun = langsmithService.traceStart('RRF Fusion', {}, runId);
+      
+      try {
+        const hybridResult = await RetrievalService.retrieveHybrid(query, runId);
+        
+        if (hybridResult.vector_success) {
+          langsmithService.traceSuccess(vectorRun, { status: "Success" });
+        } else {
+          langsmithService.traceError(vectorRun, new Error("Vector search failed or database offline"));
+        }
+        
+        if (hybridResult.bm25_success) {
+          langsmithService.traceSuccess(bm25Run, { status: "Success" });
+        } else {
+          langsmithService.traceError(bm25Run, new Error("BM25 search failed or no corpus"));
+        }
+        
+        retrievedChunks = hybridResult.results || [];
+        langsmithService.traceSuccess(rrfRun, { resultsCount: retrievedChunks.length, results: retrievedChunks });
+      } catch (err: any) {
+        langsmithService.traceError(vectorRun, err);
+        langsmithService.traceError(bm25Run, err);
+        langsmithService.traceError(rrfRun, err);
+      }
+    }
+    
+    // 4. Prompt Creation
+    const promptCreationRun = langsmithService.traceStart('Prompt Creation', { routing, hasLiveData: !!liveDataText, chunksCount: retrievedChunks.length }, runId);
+    
+    let contextText = '';
+    if (retrievedChunks.length > 0) {
+      contextText += '\nRetrieved Context Documents:\n';
+      retrievedChunks.forEach((chunk, index) => {
+        contextText += `[Document ${index + 1}] Source: ${chunk.metadata.source}, Page: ${chunk.metadata.page}\nContent: ${chunk.text}\n\n`;
+      });
+    }
+    
+    if (liveDataText) {
+      contextText += `\n${liveDataText}\n`;
+    }
+    
+    let finalPrompt = '';
+    if (mode === 'summary') {
+      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query. If the context is not relevant or does not contain the answer, use your own broad macroeconomic knowledge.
+Context/Data:
+${contextText}
+
+User Query: "${query}"
+
+Provide a brief summary of the macroeconomic implications of the query. Keep it to 2-3 sentences. Do not use any markdown formatting like ** or ##. Return your response strictly as a valid JSON object in this format: {"text": "summary text...", "sources": ["Source 1"]}`;
+    } else {
+      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query. If the context is not relevant or does not contain the answer, use your own broad macroeconomic knowledge.
+Context/Data:
+${contextText}
+
+User Query: "${query}"
+
+Provide a comprehensive macroeconomic analysis for the query. Respond ONLY in plain text without any markdown formatting like **, ##. Use clean paragraphs and standard dashes for lists.
+Return the response strictly as a valid JSON object with this structure:
+{
+  "text": "your detailed plain text response",
+  "sources": ["Real Source 1", "Real Source 2"]
+}`;
+    }
+    langsmithService.traceSuccess(promptCreationRun, { prompt: finalPrompt });
+
+    // 5. Gemini Request/Response
+    const geminiRun = langsmithService.traceStart('Gemini Request', { prompt: finalPrompt }, runId);
+    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     let resultJson;
-    if (mode === 'summary') {
-      const prompt = `Provide a brief summary of the macroeconomic implications of: "${query}". Keep it to 2-3 sentences. Do not use any markdown formatting like ** or ##. Return your response strictly as a valid JSON object in this format: {"text": "summary text...", "sources": ["Source 1"]}`;
-      const result = await model.generateContent(prompt);
-      const rawText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-      resultJson = JSON.parse(rawText);
-    } else {
-      const prompt = `Provide a comprehensive macroeconomic analysis for: "${query}". 
-      Respond ONLY in plain text without any markdown formatting like **, ##. Use clean paragraphs and standard dashes for lists.
-      Return the response strictly as a valid JSON object with this structure: 
-      {
-        "text": "your detailed plain text response", 
-        "sources": ["Real Source 1", "Real Source 2"]
-      }`;
-      const result = await model.generateContent(prompt);
-      const rawText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-      resultJson = JSON.parse(rawText);
+    try {
+      const result = await model.generateContent(finalPrompt);
+      const rawText = result.response.text().trim();
+      
+      const firstBrace = rawText.indexOf('{');
+      const lastBrace = rawText.lastIndexOf('}');
+      if (firstBrace === -1 || lastBrace === -1) {
+        throw new Error(`Invalid JSON format returned from Gemini: ${rawText}`);
+      }
+      const jsonStr = rawText.substring(firstBrace, lastBrace + 1);
+      resultJson = JSON.parse(jsonStr);
+      
+      langsmithService.traceSuccess(geminiRun, resultJson);
+    } catch (err: any) {
+      langsmithService.traceError(geminiRun, err);
+      try {
+        fs.appendFileSync('D:\\PROJECTS\\Macro_RAG\\debug.log', `[${new Date().toISOString()}] JSON parsing failed. Error: ${err.stack || err.message}\n`);
+      } catch (e) {}
+      throw err;
     }
+    
+    // Merge source filenames
+    const chunkSources = retrievedChunks.map(c => c.metadata.filename || c.metadata.source);
+    const allSources = Array.from(new Set([...(resultJson.sources || []), ...chunkSources]));
 
-    langsmithService.traceSuccess(runId, resultJson);
-
-    res.json({
+    const responsePayload = {
       text: resultJson.text,
-      sources: resultJson.sources
-    });
-  } catch (err) {
+      sources: allSources,
+      liveDataUsed: !!liveDataText
+    };
+
+    langsmithService.traceSuccess(runId, responsePayload);
+
+    res.json(responsePayload);
+  } catch (err: any) {
     console.error('Gemini error:', err);
+    try {
+      fs.appendFileSync('D:\\PROJECTS\\Macro_RAG\\debug.log', `[${new Date().toISOString()}] Gemini error: ${err.stack || err}\n`);
+    } catch (e) {}
     langsmithService.traceError(runId, err);
     res.status(500).json({ error: 'Failed to fetch from Gemini' });
   }

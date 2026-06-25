@@ -22,3 +22,14 @@ dist/
 build/
 *.egg
 *.log
+
+# Local vector databases
+backend/data/
+data/chroma_db/
+
+# Local SQLite database
+backend/prisma/dev.db
+
+# Local knowledge base PDFs
+knowledge_base/Global/
+knowledge_base/India/

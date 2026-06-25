@@ -12,10 +12,46 @@ An enterprise-grade, full-stack macroeconomic analysis platform, risk simulation
 *   **Asset Yield Curves**: Interactive visualization of the United States Treasury Yield Curve (comparing current rates with 1 month ago).
 *   **Watchlist Management**: Add and track targeted indicators/countries, with capabilities to configure alert thresholds.
 
-### 2. Macro Copilot (Conversational Assistant)
-*   An AI assistant powered by **Gemini 2.5 Flash** to answer complex macroeconomic queries.
-*   **Summary Mode**: Delivers quick, concise 2-3 sentence summaries.
+### 2. Macro Copilot (Hybrid RAG Conversational Assistant)
+*   An AI assistant powered by **Gemini 2.5 Flash** integrated with a **Hybrid Retrieval-Augmented Generation (RAG)** architecture.
+*   **Hybrid Retrieval**: Combines dense vector search (ChromaDB) and sparse keyword retrieval (BM25) using **Reciprocal Rank Fusion (RRF)** to retrieve context from G20 macroeconomic reports before generating responses.
+*   **Summary Mode**: Delivers quick, concise 2-3 sentence summaries backed by retrieved documents.
 *   **Detailed Mode**: Yields comprehensive analytical papers with real-world source citations.
+*   **Sources & Badges**: Dynamically displays a list of "Sources Used" and a "Live Economic Indicators" badge when FRED data is utilized.
+
+### 3. PDF Ingestion & Knowledge Base
+*   Curated repository of official macroeconomic PDF reports (e.g. IMF World Economic Outlook, World Bank Global Economic Prospects, OECD Economic Outlook, RBI Annual Report, Economic Survey of India).
+*   **Ingestion Pipeline**: Recursively scans, extracts text, chunks (size 800, overlap 150), embeds (`BAAI/bge-small-en-v1.5`), and indexes files into ChromaDB.
+*   Rebuilds vector stores manually on command.
+
+### 4. Retrieval Pipeline Architecture
+```
+User Question
+      │
+      ▼
+Question Router ──► (LIVE_DATA / BOTH) ──► SQLite/FRED KPI Retrieval
+      │
+      ▼ (DOCUMENT_RETRIEVAL / BOTH)
+BM25 Keyword Search  +  ChromaDB Vector Search (BAAI/bge-small-en-v1.5)
+      │                       │
+      └───────────┬───────────┘
+                  ▼
+     Reciprocal Rank Fusion (RRF)
+                  │
+                  ▼ (Top 5 Chunks)
+           Prompt Builder
+                  │
+                  ▼
+                Gemini
+                  │
+                  ▼
+        Response with Sources
+```
+
+### 5. LangSmith Observability
+*   Traces complete macroeconomic request lifecycles including inputs, outputs, latency, errors, and metadata.
+*   Presents each stage as nested child spans (`Question Router`, `Vector/BM25 Search`, `RRF Fusion`, `FRED Retrieval`, `Gemini Request`).
+*   **Production-Safe**: Tracing is optional. If disabled (`LANGSMITH_ENABLED=false`) or the API key is absent, the application bypasses tracing gracefully without throwing exceptions or interrupting user requests.
 
 ### 3. Risk Simulation Lab
 *   Stress-test sovereign economies by adjusting critical inputs: GDP growth, inflation, unemployment, and policy interest rates.
@@ -57,13 +93,21 @@ Every incoming data series is evaluated through a weighted four-layer validation
 
 *   **Frontend**: React (Vite SPA), Vanilla CSS, Lucide React, Recharts (Charts), React Simple Maps / D3 (Geospatial maps).
 *   **Backend**: Node.js, Express, TypeScript, Prisma ORM, SQLite.
-*   **Generative AI**: Google Generative AI SDK (Gemini models).
+*   **Generative AI**: Google Generative AI SDK (Gemini models), LangChain, LangSmith, ChromaDB, BM25, Reciprocal Rank Fusion (RRF).
 *   **Analytics**: Python (Pandas, NumPy).
 *   **Containerization**: Docker, Docker Compose (orchestrating Python/Streamlit & Neo4j database containers).
 
 ---
 
 ## 📦 Project Architecture
+
+```
+Frontend (React) ◄──► Express Backend ◄──► Question Router
+                             │
+                             ├─► BM25 + ChromaDB (retrieve.py) ─► RRF ─► Prompt Builder ─► Gemini
+                             │
+                             └─► LangSmith (observability spans)
+```
 
 ```
 Macro_RAG/
@@ -119,6 +163,18 @@ Macro_RAG/
     npm run dev
     ```
     The backend will run at `http://localhost:8000`.
+
+### Knowledge Base & Ingestion Setup
+To populate the vector database with macroeconomic PDF reports:
+1. Ensure you have installed the Python requirements in the project root:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Place your macroeconomic PDF documents in `knowledge_base/Global` or `knowledge_base/India`.
+3. Rebuild and ingest the documents into ChromaDB by running the ingestion command in the `backend` directory:
+   ```bash
+   npm run ingest
+   ```
 
 ### Frontend Configuration
 1.  Navigate to the `/frontend` folder:

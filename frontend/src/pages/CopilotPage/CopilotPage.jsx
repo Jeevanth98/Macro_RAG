@@ -53,7 +53,7 @@ export default function CopilotPage() {
       setMessages(prev => {
         const newMsg = [...prev];
         newMsg.pop(); // remove loading message
-        newMsg.push({ role: 'ai', content: res.text, sources: res.sources });
+        newMsg.push({ role: 'ai', content: res.text, sources: res.sources, liveDataUsed: res.liveDataUsed });
         return newMsg;
       });
     } catch (e) {
@@ -101,10 +101,18 @@ export default function CopilotPage() {
               <div className="chat-bubble">
                 <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
                 {msg.sources && msg.sources.length > 0 && (
-                  <div className="copilot-widget__sources mt-4" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {msg.sources.map((s, idx) => (
-                      <span key={idx} className="badge bg-secondary text-muted" style={{ fontSize: 11 }}>{s}</span>
-                    ))}
+                  <div className="copilot-widget__sources mt-4">
+                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-muted)', marginBottom: '4px' }}>Sources Used:</div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {msg.sources.map((s, idx) => (
+                        <span key={idx} className="badge bg-secondary text-muted" style={{ fontSize: 11 }}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {msg.liveDataUsed && (
+                  <div className="mt-2" style={{ display: 'flex', gap: 8 }}>
+                    <span className="badge" style={{ fontSize: 11, backgroundColor: '#12B981', color: 'white', padding: '2px 8px', borderRadius: '4px', fontWeight: '500' }}>Live Economic Indicators</span>
                   </div>
                 )}
               </div>

@@ -28,22 +28,28 @@ export class LangSmithService {
   /**
    * Start a tracing run. Returns a unique run ID.
    */
-  public traceStart(runName: string, inputs: any): string {
+  public traceStart(runName: string, inputs: any, parentRunId?: string): string {
     const runId = randomUUID();
     try {
       if (!this.isEnabled || !this.client) return runId;
 
       console.log(`[Observability][Start] Run Name: ${runName} | Run ID: ${runId}`);
       
-      // Async fire-and-forget execution to avoid blocking application main thread
-      this.client.createRun({
+      const runPayload: any = {
         id: runId,
         name: runName,
         run_type: 'chain',
         inputs,
         project_name: this.projectName,
         start_time: Date.now()
-      }).catch(err => {
+      };
+
+      if (parentRunId) {
+        runPayload.parent_run_id = parentRunId;
+      }
+      
+      // Async fire-and-forget execution to avoid blocking application main thread
+      this.client.createRun(runPayload).catch(err => {
         console.warn(`[Observability] Failed to create run in LangSmith for ${runName}:`, err);
       });
     } catch (e) {
