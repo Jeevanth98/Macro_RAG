@@ -40,6 +40,124 @@
   gap: 1.5rem;
 }
 
+/* Section 1: Enterprise AI Trust Status */
+.trust-status-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.trust-status-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.trust-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.trust-status-subcard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trust-status-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.trust-status-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trust-status-value.status-operational {
+  color: var(--success);
+}
+
+.trust-status-value.status-health {
+  color: var(--brand-primary);
+}
+
+.trust-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.25rem;
+}
+
+.trust-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-secondary);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.trust-check-icon {
+  color: var(--success);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.trust-check-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-grow: 1;
+}
+
+.trust-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
+}
+
+.trust-status-badge.active {
+  background: rgba(18, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(18, 185, 129, 0.2);
+}
+
+.trust-status-badge.connected {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--info);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.trust-status-badge.enabled {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--brand-primary);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.trust-status-badge.indexed {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Section 3: Why card */
 .trust-intro-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -52,14 +170,23 @@
   font-size: 0.95rem;
   line-height: 1.65;
   color: var(--text-secondary);
+  margin-bottom: 1.25rem;
 }
 
 .trust-highlight-panel {
   background: var(--bg-secondary);
-  border-left: 4px solid var(--text-brand);
+  border-left: 4px solid var(--brand-primary);
   padding: 1.5rem;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  margin: 1rem 0 0 0;
+  border-top: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.trust-highlight-title {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
 }
 
 .trust-highlight-panel p {
@@ -73,6 +200,7 @@
   margin-bottom: 0;
 }
 
+/* Section 2: Enterprise Trust Layers Grid */
 .trust-layers-title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -83,7 +211,7 @@
 
 .trust-layers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.25rem;
 }
 
@@ -93,26 +221,36 @@
   border-radius: var(--radius-md);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
 }
 
 .trust-layer-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: var(--text-brand);
+  border-color: var(--brand-primary);
 }
 
 .trust-layer-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
 .trust-layer-icon {
-  color: var(--text-brand);
+  color: var(--brand-primary);
   display: flex;
   align-items: center;
+  padding-top: 0.15rem;
+}
+
+.trust-layer-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
 }
 
 .trust-layer-header h3 {
@@ -122,11 +260,30 @@
   margin: 0;
 }
 
+.trust-card-status-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-xs);
+  align-self: flex-start;
+}
+
+.trust-card-status-badge.active {
+  background: rgba(18, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.trust-card-status-badge.enabled {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--brand-primary);
+}
+
 .trust-layer-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: auto;
+  padding-bottom: 1rem;
 }
 
 .trust-layer-badge {
@@ -136,31 +293,225 @@
   font-weight: 600;
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-xs);
+  border: 1px solid var(--border-light);
 }
 
 .trust-layer-purpose {
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.75rem;
+  margin-top: auto;
 }
 
 .trust-layer-purpose strong {
   color: var(--text-secondary);
 }
 
+/* Dashboard Grid Rows & Columns */
+.trust-dashboard-row-two,
+.trust-dashboard-row-four {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.trust-dashboard-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.trust-dashboard-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.trust-layers-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* Vertical Workflow Layout */
+.trust-workflow-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.trust-workflow-vertical {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  height: calc(100% - 2.5rem);
+  justify-content: space-between;
+}
+
+.trust-workflow-step-vertical {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.trust-workflow-step-vertical:hover {
+  border-color: var(--brand-primary);
+  background: var(--bg-card);
+}
+
+.trust-workflow-icon-vertical {
+  color: var(--brand-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.trust-workflow-content-vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.trust-workflow-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trust-workflow-connector-vertical {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12px;
+  line-height: 1;
+}
+
+@media (max-width: 1024px) {
+  .trust-dashboard-row-two,
+  .trust-dashboard-row-four {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Section 5: Responsible AI compliance notice */
+.trust-notice-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--text-muted);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+
+.trust-notice-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.trust-notice-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Section 6: Platform Metadata Table */
+.trust-metadata-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.trust-metadata-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.trust-table-wrapper {
+  overflow-x: auto;
+}
+
+.trust-metadata-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.trust-metadata-table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.trust-metadata-table tr:last-child td {
+  border-bottom: none;
+}
+
+.trust-metadata-table td:first-child {
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 40%;
+}
+
+.trust-metadata-table td:last-child {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Section 7: Principles Card */
 .trust-principles-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 1.75rem;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .trust-principles-title {
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .trust-principles-badges {
@@ -181,43 +532,95 @@
 }
 
 .trust-principle-badge:hover {
-  background: var(--text-brand);
+  background: var(--brand-primary);
   color: #fff;
-  border-color: var(--text-brand);
+  border-color: var(--brand-primary);
 }
 
+/* Platform Evolution (Roadmap) Styles */
+.trust-evolution-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.trust-evolution-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.trust-evolution-lists {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .trust-evolution-lists {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.trust-evolution-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trust-evolution-subtitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.trust-evolution-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trust-evolution-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.trust-evo-bullet {
+  font-weight: bold;
+}
+
+.trust-evo-bullet.completed {
+  color: var(--success);
+}
+
+.trust-evo-bullet.planned {
+  color: var(--text-muted);
+}
+
+/* General Layout Items */
 .trust-executive-summary {
   background: linear-gradient(135deg, rgba(109, 93, 252, 0.05), rgba(139, 92, 246, 0.05));
-  border: 1px dashed var(--text-brand);
+  border: 1px dashed var(--brand-primary);
   border-radius: var(--radius-md);
   padding: 1.5rem;
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text-secondary);
   text-align: center;
-}
-
-.trust-notice-panel {
-  background: rgba(245, 158, 11, 0.04);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-}
-
-.trust-notice-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--warning);
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
-}
-
-.trust-notice-text {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
 }
 
 .trust-closing-statement {
@@ -232,3 +635,4 @@
   text-align: center;
   border-left: 4px solid var(--success);
 }
+
