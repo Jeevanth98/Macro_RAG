@@ -128,7 +128,7 @@
 
 .chat-message--user .chat-bubble {
   background: var(--text-primary);
-  color: white;
+  color: var(--bg-primary);
   border-color: var(--text-primary);
 }
 

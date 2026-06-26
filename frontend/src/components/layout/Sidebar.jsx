@@ -30,6 +30,7 @@ const navItems = [
   { to: '/watchlist', icon: Bookmark, label: 'Watchlist' },
   { to: '/copilot', icon: Sparkles, label: 'AI Copilot' },
   { to: '/quality-center', icon: Gauge, label: 'AI Quality Center' },
+  { to: '/trust-framework', icon: ShieldCheck, label: 'AI Trust Framework' },
   { to: '/screeners', icon: SlidersHorizontal, label: 'Screeners' },
   { to: '/calendar', icon: CalendarDays, label: 'Calendar' },
   { to: '/simulation', icon: Activity, label: 'Simulation' },

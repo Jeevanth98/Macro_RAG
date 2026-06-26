@@ -17,6 +17,7 @@ import ApprovalsPage from './pages/ApprovalsPage/ApprovalsPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import QualityCenterPage from './pages/QualityCenterPage/QualityCenterPage';
 import InnovationExchangePage from './pages/InnovationExchangePage/InnovationExchangePage';
+import AITrustFrameworkPage from './pages/AITrustFrameworkPage/AITrustFrameworkPage';
 import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
           {/* Phase 3 Pages */}
           <Route path="/copilot" element={<AppLayout><CopilotPage /></AppLayout>} />
           <Route path="/quality-center" element={<AppLayout><QualityCenterPage /></AppLayout>} />
+          <Route path="/trust-framework" element={<AppLayout><AITrustFrameworkPage /></AppLayout>} />
           <Route path="/watchlist" element={<AppLayout><WatchlistPage /></AppLayout>} />
           
           {/* Phase 4 & 5 Pages */}

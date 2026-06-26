@@ -131,39 +131,44 @@ export class RetrievalService {
   }
 
   /**
-   * Question Router using Gemini to classify routing needs.
+   * Question Router using Gemini to classify routing needs AFTER retrieval has run.
    */
-  public static async routeQuestion(query: string, parentRunId?: string): Promise<'LIVE_DATA' | 'DOCUMENT_RETRIEVAL' | 'BOTH'> {
-    const runId = langsmithService.traceStart('Question Router', { query }, parentRunId as any);
+  public static async routeQuestion(query: string, hasStrongRAG: boolean, parentRunId?: string): Promise<'USE_RAG' | 'USE_LIVE_API' | 'USE_GENERAL_KNOWLEDGE'> {
+    const runId = langsmithService.traceStart('Question Router', { query, hasStrongRAG }, parentRunId as any);
     
     try {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       
       const prompt = `You are an expert macroeconomic question router. Your job is to classify the user's question into one of three routing targets:
-1. 'LIVE_DATA': If the question asks for current/latest/real-time numbers, rates, or figures for G20 countries (e.g. GDP rate, US inflation, unemployment rate, federal funds rate, consumer sentiment).
-2. 'DOCUMENT_RETRIEVAL': If the question asks for explanations of economic concepts, policies, definitions, historical papers, or reports (e.g. stagflation, monetary easing, liquidity trap, RBI policy targets).
-3. 'BOTH': If the question clearly asks for BOTH current figures/live rates AND conceptual/historical explanation/implication.
+1. 'USE_LIVE_API': If the question asks for current, latest, today's, or real-time numbers, rates, or figures (e.g. GDP rate, US inflation, unemployment rate, federal funds rate, USD/INR rate, latest consumer sentiment).
+2. 'USE_RAG': If the question asks for explanations of economic concepts, policies, definitions, historical papers, reports, or country-specific macroeconomic details that can be found in reference documents.
+3. 'USE_GENERAL_KNOWLEDGE': If the question asks for general macroeconomic theory, definitions, or explanations that do not require specific reference documents or real-time data.
 
 Analyze this query: "${query}"
 
-Return ONLY one of the three strings: 'LIVE_DATA', 'DOCUMENT_RETRIEVAL', or 'BOTH'. Do not include any other characters, punctuation, markdown formatting, or explanations.`;
+Return ONLY one of the three strings: 'USE_LIVE_API', 'USE_RAG', or 'USE_GENERAL_KNOWLEDGE'. Do not include any other characters, punctuation, markdown formatting, or explanations.`;
       
       const response = await model.generateContent(prompt);
-      const decision = response.response.text().trim().replace(/['"`]/g, '') as 'LIVE_DATA' | 'DOCUMENT_RETRIEVAL' | 'BOTH';
+      const decision = response.response.text().trim().replace(/['"`]/g, '') as 'USE_LIVE_API' | 'USE_RAG' | 'USE_GENERAL_KNOWLEDGE';
       
-      if (['LIVE_DATA', 'DOCUMENT_RETRIEVAL', 'BOTH'].includes(decision)) {
-        langsmithService.traceSuccess(runId, { decision });
-        return decision;
+      if (['USE_LIVE_API', 'USE_RAG', 'USE_GENERAL_KNOWLEDGE'].includes(decision)) {
+        let finalDecision = decision;
+        if (decision === 'USE_RAG' && !hasStrongRAG) {
+          console.log(`[RetrievalService] RAG was selected but retrieval results are weak/empty. Falling back to USE_GENERAL_KNOWLEDGE.`);
+          finalDecision = 'USE_GENERAL_KNOWLEDGE';
+        }
+        langsmithService.traceSuccess(runId, { decision: finalDecision, originalDecision: decision });
+        return finalDecision;
       }
       
-      console.warn(`[RetrievalService] Unexpected router response: ${decision}, defaulting to BOTH`);
-      langsmithService.traceSuccess(runId, { decision: 'BOTH', fallback: true });
-      return 'BOTH';
+      console.warn(`[RetrievalService] Unexpected router response: ${decision}, defaulting to USE_GENERAL_KNOWLEDGE`);
+      langsmithService.traceSuccess(runId, { decision: 'USE_GENERAL_KNOWLEDGE', fallback: true });
+      return 'USE_GENERAL_KNOWLEDGE';
     } catch (e) {
-      console.error('[RetrievalService] Question routing failed, defaulting to BOTH:', e);
+      console.error('[RetrievalService] Question routing failed, defaulting to USE_GENERAL_KNOWLEDGE:', e);
       langsmithService.traceError(runId, e);
-      return 'BOTH';
+      return 'USE_GENERAL_KNOWLEDGE';
     }
   }
 }

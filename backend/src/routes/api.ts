@@ -143,52 +143,81 @@ router.post('/copilot/ask', async (req, res) => {
   const runId = langsmithService.traceStart('Gemini Copilot', { query, mode });
   
   try {
-    // 1. Question Router
-    const routing = await RetrievalService.routeQuestion(query, runId);
+    console.log(`[Retrieval-First] Starting Copilot request for query: "${query}"`);
     
-    let liveDataText = '';
+    // 1. Document Retrieval (Hybrid: Vector + BM25) executed ALWAYS
     let retrievedChunks: RetrievedChunk[] = [];
+    let hybridResult: RetrievalResult = { vector_success: false, bm25_success: false, results: [] };
     
-    // 2. FRED / SQLite Retrieval
-    if (routing === 'LIVE_DATA' || routing === 'BOTH') {
+    console.log(`[Retrieval-First] Running Hybrid Retrieval...`);
+    const vectorRun = langsmithService.traceStart('Vector Retrieval', { query }, runId);
+    const bm25Run = langsmithService.traceStart('BM25 Retrieval', { query }, runId);
+    const rrfRun = langsmithService.traceStart('RRF Fusion', {}, runId);
+    
+    try {
+      hybridResult = await RetrievalService.retrieveHybrid(query, runId);
+      
+      if (hybridResult.vector_success) {
+        langsmithService.traceSuccess(vectorRun, { status: "Success" });
+      } else {
+        langsmithService.traceError(vectorRun, new Error("Vector search failed or database offline"));
+      }
+      
+      if (hybridResult.bm25_success) {
+        langsmithService.traceSuccess(bm25Run, { status: "Success" });
+      } else {
+        langsmithService.traceError(bm25Run, new Error("BM25 search failed or no corpus"));
+      }
+      
+      retrievedChunks = hybridResult.results || [];
+      langsmithService.traceSuccess(rrfRun, { resultsCount: retrievedChunks.length, results: retrievedChunks });
+      console.log(`[Retrieval-First] Hybrid retrieval complete. Found ${retrievedChunks.length} chunks.`);
+    } catch (err: any) {
+      console.error(`[Retrieval-First] Hybrid retrieval failed:`, err);
+      langsmithService.traceError(vectorRun, err);
+      langsmithService.traceError(bm25Run, err);
+      langsmithService.traceError(rrfRun, err);
+    }
+
+    // 2. Evaluate Retrieval Quality
+    let hasStrongRAG = false;
+    const scoresLog: string[] = [];
+    if (retrievedChunks.length > 0) {
+      hasStrongRAG = retrievedChunks.some(chunk => {
+        const vSim = chunk.vector_score !== null && chunk.vector_score !== undefined ? (1 - chunk.vector_score) : 0;
+        const bScore = chunk.bm25_score || 0;
+        scoresLog.push(`(Vector Similarity: ${vSim.toFixed(3)}, BM25: ${bScore})`);
+        return vSim >= 0.5 || bScore >= 1.5;
+      });
+    }
+    console.log(`[Retrieval-First] Retrieval scores: ${scoresLog.join(', ')}`);
+    console.log(`[Retrieval-First] Evaluate Retrieval Quality: hasStrongRAG = ${hasStrongRAG}`);
+
+    // 3. Question Router (Repurposed Decision Engine)
+    console.log(`[Retrieval-First] Running repurposed Question Router...`);
+    const decision = await RetrievalService.routeQuestion(query, hasStrongRAG, runId);
+    console.log(`[Retrieval-First] Decision Engine output: ${decision}`);
+
+    let liveDataText = '';
+    
+    // 4. Execute based on Decision Strategy
+    if (decision === 'USE_LIVE_API') {
+      console.log(`[Retrieval-First] Fetching Live Data (FRED/SQLite)...`);
       const fredRun = langsmithService.traceStart('FRED Retrieval', { query }, runId);
       try {
         liveDataText = await RetrievalService.getLiveDataSummary();
         langsmithService.traceSuccess(fredRun, { summary: liveDataText });
+        console.log(`[Retrieval-First] Live data summary successfully fetched.`);
       } catch (err) {
+        console.error(`[Retrieval-First] Live data fetch failed:`, err);
         langsmithService.traceError(fredRun, err);
       }
-    }
-    
-    // 3. Document Retrieval (Hybrid: Vector + BM25)
-    let hybridResult: RetrievalResult = { vector_success: false, bm25_success: false, results: [] };
-    if (routing === 'DOCUMENT_RETRIEVAL' || routing === 'BOTH') {
-      const vectorRun = langsmithService.traceStart('Vector Retrieval', { query }, runId);
-      const bm25Run = langsmithService.traceStart('BM25 Retrieval', { query }, runId);
-      const rrfRun = langsmithService.traceStart('RRF Fusion', {}, runId);
-      
-      try {
-        hybridResult = await RetrievalService.retrieveHybrid(query, runId);
-        
-        if (hybridResult.vector_success) {
-          langsmithService.traceSuccess(vectorRun, { status: "Success" });
-        } else {
-          langsmithService.traceError(vectorRun, new Error("Vector search failed or database offline"));
-        }
-        
-        if (hybridResult.bm25_success) {
-          langsmithService.traceSuccess(bm25Run, { status: "Success" });
-        } else {
-          langsmithService.traceError(bm25Run, new Error("BM25 search failed or no corpus"));
-        }
-        
-        retrievedChunks = hybridResult.results || [];
-        langsmithService.traceSuccess(rrfRun, { resultsCount: retrievedChunks.length, results: retrievedChunks });
-      } catch (err: any) {
-        langsmithService.traceError(vectorRun, err);
-        langsmithService.traceError(bm25Run, err);
-        langsmithService.traceError(rrfRun, err);
-      }
+    } else if (decision === 'USE_GENERAL_KNOWLEDGE') {
+      console.log(`[Retrieval-First] Underperforming retrieval and Live API not required. Cleaning context to use general knowledge.`);
+      // Clear out low-quality/irrelevant chunks so Gemini doesn't get confused
+      retrievedChunks = [];
+    } else {
+      console.log(`[Retrieval-First] Using retrieved RAG documents.`);
     }
 
     // Calculate RAG Confidence
@@ -196,8 +225,8 @@ router.post('/copilot/ask', async (req, res) => {
       ? ConfidenceEngine.calculateRAGConfidence(hybridResult)
       : null;
     
-    // 4. Prompt Creation
-    const promptCreationRun = langsmithService.traceStart('Prompt Creation', { routing, hasLiveData: !!liveDataText, chunksCount: retrievedChunks.length }, runId);
+    // 5. Prompt Creation
+    const promptCreationRun = langsmithService.traceStart('Prompt Creation', { decision, hasLiveData: !!liveDataText, chunksCount: retrievedChunks.length }, runId);
     
     let contextText = '';
     if (retrievedChunks.length > 0) {
@@ -212,20 +241,35 @@ router.post('/copilot/ask', async (req, res) => {
     }
     
     let finalPrompt = '';
+    
+    const groundingInstructions = `
+You must strictly follow this priority and guidelines:
+1. Retrieved context documents are your PRIMARY source of truth.
+2. If the retrieved context documents answer the question, use them to construct your answer.
+3. Use Live API / FRED data only when current real-time or latest macroeconomic figures/rates are specifically required.
+4. Use your general macroeconomic knowledge ONLY when retrieved context documents and Live API data do not contain the answer or are not present.
+5. Do NOT ignore relevant retrieved documents.
+6. Clearly distinguish retrieved facts from your own model reasoning or assumptions. Keep your answer highly grounded in the provided context documents.
+`;
+
     if (mode === 'summary') {
-      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query. If the context is not relevant or does not contain the answer, use your own broad macroeconomic knowledge.
+      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query.
 Context/Data:
 ${contextText}
 
 User Query: "${query}"
+
+${groundingInstructions}
 
 Provide a brief summary of the macroeconomic implications of the query. Keep it to 2-3 sentences. Do not use any markdown formatting like ** or ##. Return your response strictly as a valid JSON object in this format: {"text": "summary text...", "sources": ["Source 1"]}`;
     } else {
-      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query. If the context is not relevant or does not contain the answer, use your own broad macroeconomic knowledge.
+      finalPrompt = `You are a helpful G20 macroeconomic assistant. Use the following context and data (if available and relevant) to answer the query.
 Context/Data:
 ${contextText}
 
 User Query: "${query}"
+
+${groundingInstructions}
 
 Provide a comprehensive macroeconomic analysis for the query. Respond ONLY in plain text without any markdown formatting like **, ##. Use clean paragraphs and standard dashes for lists.
 Return the response strictly as a valid JSON object with this structure:
